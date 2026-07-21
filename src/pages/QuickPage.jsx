@@ -83,7 +83,8 @@ export default function QuickPage () {
 
   const quickLines = cart.lines.filter(l => l.id.startsWith('q'))
   const quickTotal = quickLines.reduce((a, l) => a + l.product.price * l.qty, 0)
-  const quickCount = quickLines.reduce((a, l) => a + l.qty, 0)
+  // distinct items, matching the cart badge everywhere else
+  const quickCount = quickLines.length
 
   return (
     <>

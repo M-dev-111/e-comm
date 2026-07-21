@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Heart, ShoppingCart, BadgeCheck } from 'lucide-react'
+import { Heart, BadgeCheck } from 'lucide-react'
 import Img from '../ui/Img'
 import PriceBlock from '../ui/PriceBlock'
 import { RatingBadge } from '../ui/Rating'
+import AddToCartControl from './AddToCartControl'
 import { useWishlist } from '../../context/WishlistContext'
-import { useCart } from '../../context/CartContext'
 import { useToast } from '../../context/ToastContext'
 import { fadeUp } from '../../utils/motion'
 
@@ -21,17 +21,9 @@ const TAG_LABELS = { bestseller: 'Bestseller', deal: 'Deal', trending: 'Trending
 /** The core product card — used in rails, grids and related sections. */
 export default function ProductCard ({ product, index = 0 }) {
   const wishlist = useWishlist()
-  const cart = useCart()
   const toast = useToast()
   const liked = wishlist.has(product.id)
   const tag = product.tags?.[0]
-
-  const quickAdd = e => {
-    e.preventDefault()
-    // pre-select first variant so quick-add mirrors what PDP would do
-    cart.add(product.id, { size: product.sizes?.[0] || null, color: product.colors?.[0] || null })
-    toast(`${product.brand} added to cart`)
-  }
 
   return (
     <motion.article
@@ -77,16 +69,6 @@ export default function ProductCard ({ product, index = 0 }) {
             />
           </motion.button>
 
-          {/* slide-up quick add */}
-          <div className='absolute inset-x-2.5 bottom-2.5 translate-y-[120%] opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100'>
-            <button
-              onClick={quickAdd}
-              className='flex w-full items-center justify-center gap-2 rounded-xl bg-royal-600 py-2.5 text-[12px] font-bold text-white shadow-glow-royal transition-colors hover:bg-royal-700'
-            >
-              <ShoppingCart className='h-3.5 w-3.5' strokeWidth={2.4} />
-              Add to Cart
-            </button>
-          </div>
         </div>
 
         {/* body */}
@@ -109,6 +91,10 @@ export default function ProductCard ({ product, index = 0 }) {
           </div>
 
           <PriceBlock price={product.price} mrp={product.mrp} size='sm' />
+
+          <div className='pt-2'>
+            <AddToCartControl product={product} />
+          </div>
         </div>
       </Link>
     </motion.article>

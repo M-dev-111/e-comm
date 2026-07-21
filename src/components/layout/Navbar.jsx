@@ -180,9 +180,13 @@ function UserMenu ({ onLogin }) {
               <p className='text-[11.5px] text-slate-400'>+91 {auth.user.phone}</p>
             </div>
             <div className='p-1.5'>
-              <button className='flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[12.5px] font-semibold text-slate-600 transition-colors hover:bg-royal-50 hover:text-royal-700'>
+              <Link
+                to='/orders'
+                onClick={() => setOpen(false)}
+                className='flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12.5px] font-semibold text-slate-600 transition-colors hover:bg-royal-50 hover:text-royal-700'
+              >
                 <Package className='h-4 w-4' strokeWidth={2} /> My Orders
-              </button>
+              </Link>
               <Link
                 to='/wishlist'
                 onClick={() => setOpen(false)}

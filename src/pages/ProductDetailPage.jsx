@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BadgeCheck, ChevronRight, Heart, MapPin, PackageSearch, RotateCcw, ShieldCheck,
-  ShoppingCart, Tag, Truck, Zap
+  Tag, Truck, Zap
 } from 'lucide-react'
 import { getProductById, getRelated, getReviewsFor, CATEGORIES, COUPONS } from '../data/data'
 import { useCart } from '../context/CartContext'
@@ -14,6 +14,7 @@ import { EASE } from '../utils/motion'
 import Img from '../components/ui/Img'
 import PriceBlock from '../components/ui/PriceBlock'
 import { RatingBadge, RatingStars } from '../components/ui/Rating'
+import AddToCartControl from '../components/product/AddToCartControl'
 import ProductRail from '../components/home/ProductRail'
 import EmptyState from '../components/ui/EmptyState'
 import Container from '../components/ui/Container'
@@ -152,11 +153,6 @@ export default function ProductDetailPage () {
   const related = getRelated(product)
   const catLabel = CATEGORIES.find(c => c.id === product.category)?.label
 
-  const addToCart = () => {
-    cart.add(product.id, { size, color })
-    toast(`${product.brand} added to cart`)
-  }
-
   const buyNow = () => {
     cart.add(product.id, { size, color })
     navigate('/checkout')
@@ -180,14 +176,8 @@ export default function ProductDetailPage () {
             <Gallery key={product.id} product={product} />
 
             {/* desktop CTAs */}
-            <div className='mt-4 hidden grid-cols-2 gap-3 lg:grid'>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={addToCart}
-                className='flex items-center justify-center gap-2 rounded-2xl bg-royal-600 py-4 text-[14px] font-bold text-white shadow-glow-royal transition-colors hover:bg-royal-700'
-              >
-                <ShoppingCart className='h-4.5 w-4.5' strokeWidth={2.2} /> Add to Cart
-              </motion.button>
+            <div className='mt-4 hidden grid-cols-2 items-center gap-3 lg:grid'>
+              <AddToCartControl product={product} size={size} color={color} variant='detail' />
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={buyNow}
@@ -378,12 +368,13 @@ export default function ProductDetailPage () {
       <ProductRail kicker='You may also like' title={`More in ${catLabel}`} products={related} to={`/products?category=${product.category}`} />
 
       {/* mobile sticky buy bar */}
-      <div className='fixed inset-x-0 bottom-14.25 z-40 grid grid-cols-2 gap-px border-t border-slate-200 bg-white md:bottom-0 lg:hidden'>
-        <button onClick={addToCart} className='flex items-center justify-center gap-2 bg-white py-4 text-[13.5px] font-bold text-royal-700'>
-          <ShoppingCart className='h-4 w-4' strokeWidth={2.4} /> Add to Cart
-        </button>
-        <button onClick={buyNow} className='flex items-center justify-center gap-2 bg-linear-to-r from-olive-600 to-olive-500 py-4 text-[13.5px] font-bold text-white'>
-          <Zap className='h-4 w-4' strokeWidth={2.4} /> Buy Now
+      <div className='fixed inset-x-0 bottom-14.25 z-40 grid grid-cols-2 items-center gap-2 border-t border-slate-200 bg-white px-3 py-2.5 md:bottom-0 lg:hidden'>
+        <AddToCartControl product={product} size={size} color={color} />
+        <button
+          onClick={buyNow}
+          className='flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-olive-600 to-olive-500 py-2.5 text-[12.5px] font-bold text-white'
+        >
+          <Zap className='h-3.5 w-3.5' strokeWidth={2.4} /> Buy Now
         </button>
       </div>
     </>

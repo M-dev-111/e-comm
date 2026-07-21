@@ -148,10 +148,16 @@ export default function OrderSuccessPage () {
             <Home className='h-4 w-4' /> Continue shopping
           </Link>
           <Link
+            to='/orders'
+            className='flex items-center gap-2 rounded-full border border-royal-200 bg-royal-50 px-6 py-3 text-[13px] font-bold text-royal-700 transition-colors hover:bg-royal-100'
+          >
+            <PackageCheck className='h-4 w-4' strokeWidth={2} /> Track this order
+          </Link>
+          <Link
             to='/quick'
             className='flex items-center gap-2 rounded-full border border-olive-300 bg-olive-50 px-6 py-3 text-[13px] font-bold text-olive-700 transition-colors hover:bg-olive-100'
           >
-            Shop groceries on Minutes
+            Shop groceries on Dash
           </Link>
         </motion.div>
       </div>

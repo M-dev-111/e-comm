@@ -68,7 +68,10 @@ export function CartProvider ({ children }) {
 
   const value = useMemo(() => {
     const lines = state.items.map(it => ({ ...it, product: getProductById(it.id) }))
-    const count = lines.reduce((a, l) => a + l.qty, 0)
+    // `count` is how many distinct items are in the cart (what badges show);
+    // `units` is the quantity-weighted total.
+    const count = lines.length
+    const units = lines.reduce((a, l) => a + l.qty, 0)
     const mrpTotal = lines.reduce((a, l) => a + l.product.mrp * l.qty, 0)
     const priceTotal = lines.reduce((a, l) => a + l.product.price * l.qty, 0)
     const productDiscount = mrpTotal - priceTotal
@@ -94,6 +97,7 @@ export function CartProvider ({ children }) {
     return {
       lines,
       count,
+      units,
       mrpTotal,
       priceTotal,
       productDiscount,
@@ -110,7 +114,10 @@ export function CartProvider ({ children }) {
       removeCoupon: () => dispatch({ type: 'REMOVE_COUPON' }),
       clear: () => dispatch({ type: 'CLEAR' }),
       qtyOf: id => state.items.filter(it => it.id === id).reduce((a, it) => a + it.qty, 0),
-      keyFor: (id, size, color) => keyOf(id, size, color)
+      keyFor: (id, size, color) => keyOf(id, size, color),
+      /** Quantity of one exact variant — drives the add/stepper control. */
+      qtyOfVariant: (id, size, color) =>
+        state.items.find(it => it.key === keyOf(id, size, color))?.qty || 0
     }
   }, [state])
 

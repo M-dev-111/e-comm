@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SlidersHorizontal, X, ChevronDown, Check, SearchX } from 'lucide-react'
-import { PRODUCTS, CATEGORIES, BRANDS } from '../data/data'
+import { PRODUCTS, CATEGORIES, BRANDS, PRICE_BUCKETS } from '../data/data'
 import ProductCard from '../components/product/ProductCard'
 import EmptyState from '../components/ui/EmptyState'
 import Container from '../components/ui/Container'
@@ -14,13 +14,6 @@ const SORTS = [
   { id: 'price-desc', label: 'Price — High to Low', fn: (a, b) => b.price - a.price },
   { id: 'rating', label: 'Customer Rating', fn: (a, b) => b.rating - a.rating },
   { id: 'discount', label: 'Discount', fn: (a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp }
-]
-
-const PRICE_BUCKETS = [
-  { id: 'p1', label: 'Under ₹1,000', min: 0, max: 1000 },
-  { id: 'p2', label: '₹1,000 – ₹5,000', min: 1000, max: 5000 },
-  { id: 'p3', label: '₹5,000 – ₹20,000', min: 5000, max: 20000 },
-  { id: 'p4', label: 'Above ₹20,000', min: 20000, max: Infinity }
 ]
 
 const RATING_FILTERS = [4.5, 4, 3.5]
@@ -76,6 +69,9 @@ export default function ProductListPage () {
   const brands = params.getAll('brand')
   const prices = params.getAll('price')
   const minRating = Number(params.get('rating')) || 0
+  // exact bounds, used when the shopping assistant deep-links a typed budget
+  const minPrice = Number(params.get('min')) || 0
+  const maxPrice = Number(params.get('max')) || Infinity
 
   const patch = updates => {
     const next = new URLSearchParams(params)
@@ -109,8 +105,11 @@ export default function ProductListPage () {
       list = list.filter(p => buckets.some(b => p.price >= b.min && p.price < b.max))
     }
     if (minRating) list = list.filter(p => p.rating >= minRating)
+    if (minPrice || Number.isFinite(maxPrice)) {
+      list = list.filter(p => p.price >= minPrice && p.price <= maxPrice)
+    }
     return list.sort(SORTS.find(s => s.id === sort)?.fn || SORTS[0].fn)
-  }, [q, category, tag, sort, brandKey, priceKey, minRating]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [q, category, tag, sort, brandKey, priceKey, minRating, minPrice, maxPrice]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeCount = brands.length + prices.length + (minRating ? 1 : 0)
   const catLabel = CATEGORIES.find(c => c.id === category)?.label

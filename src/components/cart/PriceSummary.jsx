@@ -12,7 +12,8 @@ export default function PriceSummary ({ compact = false }) {
   const progress = Math.min(100, (cart.priceTotal / DELIVERY.freeAbove) * 100)
 
   const rows = [
-    [`Price (${cart.count} item${cart.count > 1 ? 's' : ''})`, formatINR(cart.mrpTotal)],
+    // quantity-weighted here so the arithmetic reads correctly
+    [`Price (${cart.units} item${cart.units > 1 ? 's' : ''})`, formatINR(cart.mrpTotal)],
     ['Product discount', `− ${formatINR(cart.productDiscount)}`, 'text-olive-600'],
     ...(cart.couponDiscount > 0 ? [[`Coupon (${cart.coupon.code})`, `− ${formatINR(cart.couponDiscount)}`, 'text-olive-600']] : []),
     ['Delivery fee', cart.deliveryFee === 0 ? 'FREE' : formatINR(cart.deliveryFee), cart.deliveryFee === 0 ? 'text-olive-600 font-bold' : ''],

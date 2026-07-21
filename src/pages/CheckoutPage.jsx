@@ -5,9 +5,12 @@ import {
   ArrowLeft, ArrowRight, Banknote, CalendarClock, Check, ClipboardList, CreditCard,
   Landmark, Loader2, Lock, MapPin, Plus, Smartphone
 } from 'lucide-react'
-import { ADDRESSES, PAYMENT_METHODS } from '../data/data'
+import { PAYMENT_METHODS } from '../data/data'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useAddresses } from '../context/AddressContext'
+import { useOrders } from '../context/OrdersContext'
+import AddressForm from '../components/checkout/AddressForm'
 import { formatINR, orderIdFrom, deliveryDateLabel } from '../utils/format'
 import { EASE } from '../utils/motion'
 import PriceSummary from '../components/cart/PriceSummary'
@@ -62,10 +65,11 @@ function Stepper ({ step }) {
 }
 
 function AddressStep ({ selected, onSelect }) {
+  const { addresses } = useAddresses()
   const [adding, setAdding] = useState(false)
   return (
     <div className='space-y-3'>
-      {ADDRESSES.map(a => (
+      {addresses.map(a => (
         <button
           key={a.id}
           onClick={() => onSelect(a)}
@@ -103,25 +107,13 @@ function AddressStep ({ selected, onSelect }) {
 
       <AnimatePresence>
         {adding && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className='overflow-hidden'
-          >
-            <div className='grid grid-cols-1 gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-card sm:grid-cols-2'>
-              {['Full name', 'Phone', 'Address line 1', 'Address line 2', 'City', 'Pincode'].map(f => (
-                <input
-                  key={f}
-                  placeholder={f}
-                  className='rounded-xl border border-slate-200 px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-royal-400'
-                />
-              ))}
-              <p className='text-[11.5px] text-slate-400 sm:col-span-2'>
-                (Static demo — pick one of the saved addresses above to continue.)
-              </p>
-            </div>
-          </motion.div>
+          <AddressForm
+            onSaved={address => {
+              onSelect(address)
+              setAdding(false)
+            }}
+            onCancel={() => setAdding(false)}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -217,8 +209,10 @@ export default function CheckoutPage () {
   const cart = useCart()
   const auth = useAuth()
   const navigate = useNavigate()
+  const { addresses } = useAddresses()
+  const { placeOrder: placeOrderRecord } = useOrders()
   const [step, setStep] = useState(0)
-  const [address, setAddress] = useState(ADDRESSES.find(a => a.default))
+  const [address, setAddress] = useState(() => addresses.find(a => a.default) || addresses[0])
   const [payment, setPayment] = useState(null)
   const [placing, setPlacing] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
@@ -268,17 +262,34 @@ export default function CheckoutPage () {
   const placeOrder = () => {
     if (!auth.user) return
     setPlacing(true)
+
     const order = {
       id: orderIdFrom(Date.now()),
+      placedAt: new Date().toISOString(),
+      status: 'confirmed',
       total: cart.total,
       savings: cart.savings,
       count: cart.count,
       payment: payment.label,
       address,
-      eta: deliveryDateLabel(3)
+      etaDays: 3,
+      eta: deliveryDateLabel(3),
+      // snapshot each line so order history is independent of the catalogue
+      items: cart.lines.map(line => ({
+        id: line.id,
+        qty: line.qty,
+        size: line.size,
+        color: line.color,
+        name: line.product.name,
+        brand: line.product.brand,
+        image: line.product.images?.[0] || line.product.image || '',
+        price: line.product.price
+      }))
     }
+
     // simulate a payment round-trip, then hand off to the success page
     setTimeout(() => {
+      placeOrderRecord(order)
       sessionStorage.setItem('mcom.lastOrder', JSON.stringify(order))
       cart.clear()
       navigate('/order-success', { replace: true })

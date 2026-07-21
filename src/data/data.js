@@ -11,6 +11,7 @@ const U = (id, w = 800) =>
 /* ------------------------------------------------------------------ */
 
 export const CATEGORIES = [
+  { id: 'mobiles', label: 'Mobiles', emoji: '📱', image: U('photo-1511707171634-5f897ff02aa9', 400), gradient: 'from-royal-700 to-royal-500' },
   { id: 'electronics', label: 'Electronics', emoji: '🎧', image: U('photo-1505740420928-5e560c06d30e', 400), gradient: 'from-royal-600 to-royal-400' },
   { id: 'fashion', label: 'Fashion', emoji: '👕', image: U('photo-1521572163474-6864f9cf17ab', 400), gradient: 'from-olive-600 to-olive-400' },
   { id: 'footwear', label: 'Footwear', emoji: '👟', image: U('photo-1542291026-7eec264c27ff', 400), gradient: 'from-royal-800 to-royal-600' },
@@ -454,6 +455,126 @@ export const PRODUCTS = [
     highlights: ['Full-grain vegetable-tanned leather', 'Fits 14" laptop + A4 files', 'Magnetic snap + zip pocket', 'Ages into a rich patina'],
     specs: { Material: 'Full-grain leather', Dimensions: '38 × 30 × 12 cm', Laptop: 'Up to 14"', Lining: 'Cotton canvas', Warranty: '1 year' },
     description: 'The workbag that outlives trends — vegetable-tanned leather that grows more beautiful with every commute.'
+  },
+  {
+    id: 'p23',
+    name: 'Nexa One 5G (8GB · 128GB)',
+    brand: 'Nexa',
+    category: 'mobiles',
+    price: 14499,
+    mrp: 19999,
+    rating: 4.3,
+    ratingCount: 18420,
+    reviewCount: 2140,
+    assured: true,
+    tags: ['bestseller', 'deal'],
+    stock: 26,
+    deliveryDays: 2,
+    colors: ['Aurora Black', 'Mist Blue'],
+    images: [U('photo-1598327105666-5b89351aff97'), U('photo-1511707171634-5f897ff02aa9'), U('photo-1580910051074-3eb694886505')],
+    highlights: ['6000 mAh battery — 2 days of real use', '50MP main camera with OIS', '6.7" 120Hz AMOLED display', '45W fast charging in the box'],
+    specs: { Display: '6.7" AMOLED 120Hz', Processor: 'Octa-core 5G chipset', Camera: '50MP OIS + 8MP ultrawide', Battery: '6000 mAh, 45W', RAM: '8GB + 128GB', Warranty: '1 year' },
+    description: 'The battery champion of its price band. Two full days away from a charger, a genuinely good 50MP camera, and a 120Hz screen that feels far more expensive.'
+  },
+  {
+    id: 'p24',
+    name: 'Pulse Nova 5G (8GB · 256GB)',
+    brand: 'Pulse',
+    category: 'mobiles',
+    price: 18999,
+    mrp: 24999,
+    rating: 4.4,
+    ratingCount: 12060,
+    reviewCount: 1488,
+    assured: true,
+    tags: ['trending'],
+    stock: 19,
+    deliveryDays: 2,
+    colors: ['Graphite', 'Sage Green'],
+    images: [U('photo-1592286927505-1def25115558'), U('photo-1567581935884-3349723552ca'), U('photo-1512054502232-10a0a035d672')],
+    highlights: ['64MP triple camera with night mode', '6.6" AMOLED, 1200 nits peak', 'Clean software, 3 OS upgrades promised', '5000 mAh with 67W charging'],
+    specs: { Display: '6.6" AMOLED 120Hz', Processor: 'Octa-core 5G chipset', Camera: '64MP + 8MP + 2MP', Battery: '5000 mAh, 67W', RAM: '8GB + 256GB', Warranty: '1 year' },
+    description: 'A clean, fast mid-ranger with a camera that punches above its price and software support that keeps it current for years.'
+  },
+  {
+    id: 'p25',
+    name: 'Stellar Lite 5G (6GB · 128GB)',
+    brand: 'Stellar',
+    category: 'mobiles',
+    price: 11999,
+    mrp: 15999,
+    rating: 4.1,
+    ratingCount: 22310,
+    reviewCount: 2760,
+    assured: true,
+    tags: ['deal'],
+    stock: 41,
+    deliveryDays: 2,
+    colors: ['Midnight', 'Ice Silver'],
+    images: [U('photo-1580910051074-3eb694886505'), U('photo-1533228100845-08145b01de14'), U('photo-1598327105666-5b89351aff97')],
+    highlights: ['Most affordable 5G in the range', '6.5" 90Hz display', '5000 mAh all-day battery', 'Expandable storage up to 1TB'],
+    specs: { Display: '6.5" LCD 90Hz', Processor: 'Octa-core 5G chipset', Camera: '50MP + 2MP', Battery: '5000 mAh, 18W', RAM: '6GB + 128GB', Warranty: '1 year' },
+    description: 'Everything you actually need from a daily phone — 5G, a big battery and a smooth screen — with nothing you do not.'
+  },
+  {
+    id: 'p26',
+    name: 'Pulse Nova Pro 5G (12GB · 256GB)',
+    brand: 'Pulse',
+    category: 'mobiles',
+    price: 34999,
+    mrp: 44999,
+    rating: 4.6,
+    ratingCount: 7840,
+    reviewCount: 962,
+    assured: true,
+    tags: ['trending', 'bestseller'],
+    stock: 12,
+    deliveryDays: 2,
+    colors: ['Obsidian', 'Porcelain'],
+    images: [U('photo-1511707171634-5f897ff02aa9'), U('photo-1601784551446-20c9e07cdbdb'), U('photo-1592286927505-1def25115558')],
+    highlights: ['Flagship-grade 108MP camera system', '6.7" LTPO AMOLED, 1-120Hz adaptive', 'Flagship processor, sustained gaming', 'IP68 water and dust resistance'],
+    specs: { Display: '6.7" LTPO AMOLED 120Hz', Processor: 'Flagship octa-core', Camera: '108MP OIS + 12MP + 5MP tele', Battery: '5000 mAh, 80W', RAM: '12GB + 256GB', Warranty: '1 year' },
+    description: 'Near-flagship performance without the flagship invoice. The 108MP sensor and adaptive LTPO panel are the headline acts.'
+  },
+  {
+    id: 'p27',
+    name: 'Stellar Edge 12 Pro (12GB · 512GB)',
+    brand: 'Stellar',
+    category: 'mobiles',
+    price: 64999,
+    mrp: 79999,
+    rating: 4.7,
+    ratingCount: 5210,
+    reviewCount: 688,
+    assured: true,
+    tags: ['premium'],
+    stock: 7,
+    deliveryDays: 3,
+    colors: ['Titanium Grey', 'Deep Blue'],
+    images: [U('photo-1601784551446-20c9e07cdbdb'), U('photo-1585060544812-6b45742d762f'), U('photo-1511707171634-5f897ff02aa9')],
+    highlights: ['Top-tier processor — best-in-class gaming', '6.8" QHD+ LTPO, 2600 nits peak', 'Titanium frame, IP68 rated', '100W wired + 50W wireless charging'],
+    specs: { Display: '6.8" QHD+ LTPO 144Hz', Processor: 'Flagship octa-core, ray tracing', Camera: '50MP + 50MP tele + 13MP UW', Battery: '5400 mAh, 100W', RAM: '12GB + 512GB', Warranty: '2 years' },
+    description: 'The no-compromise flagship. Sustained peak performance for heavy gaming, a QHD+ 144Hz panel and a titanium body that shrugs off daily life.'
+  },
+  {
+    id: 'p28',
+    name: 'Lumen Vision X 5G (12GB · 256GB)',
+    brand: 'Lumen',
+    category: 'mobiles',
+    price: 49999,
+    mrp: 59999,
+    rating: 4.5,
+    ratingCount: 4130,
+    reviewCount: 512,
+    assured: true,
+    tags: ['premium', 'trending'],
+    stock: 9,
+    deliveryDays: 3,
+    colors: ['Studio Black', 'Sand'],
+    images: [U('photo-1567581935884-3349723552ca'), U('photo-1512054502232-10a0a035d672'), U('photo-1533228100845-08145b01de14')],
+    highlights: ['1-inch camera sensor tuned by Lumen optics', '4K 60fps 10-bit video recording', 'Pro manual camera controls', '6.7" AMOLED colour-calibrated display'],
+    specs: { Display: '6.7" AMOLED 120Hz', Processor: 'Flagship octa-core', Camera: '1" 50MP OIS + 48MP tele + 48MP UW', Battery: '5000 mAh, 90W', RAM: '12GB + 256GB', Warranty: '2 years' },
+    description: 'Built for people who shoot. A true 1-inch sensor, manual pro controls and 10-bit video make this the closest a phone gets to a real camera.'
   }
 ]
 
@@ -551,7 +672,17 @@ export const PROMO_TILES = [
   { id: 'promo3', title: 'Deal Zone', sub: 'Up to 70% off today', cta: 'View deals', to: '/products?tag=deal', image: U('photo-1607082348824-0a96f2a4b9da', 700), badge: 'Limited time' }
 ]
 
-export const BRANDS = ['Sonicwave', 'AeroStride', 'Drift', 'HavenHome', 'Stellar', 'Lumière', 'GlowLab', 'Solstice', 'Pulse', 'TrekLite', 'Lumen']
+export const BRANDS = ['Sonicwave', 'AeroStride', 'Drift', 'HavenHome', 'Stellar', 'Lumière', 'GlowLab', 'Solstice', 'Pulse', 'TrekLite', 'Lumen', 'Nexa']
+
+/* Price bands — shared by the listing page filters and the shopping assistant,
+   so an assistant result can deep-link into an identical filtered listing. */
+export const PRICE_BUCKETS = [
+  { id: 'p1', label: 'Under ₹1,000', short: 'Under ₹1k', min: 0, max: 1000 },
+  { id: 'p2', label: '₹1,000 – ₹5,000', short: '₹1k – ₹5k', min: 1000, max: 5000 },
+  { id: 'p3', label: '₹5,000 – ₹20,000', short: '₹5k – ₹20k', min: 5000, max: 20000 },
+  { id: 'p4', label: '₹20,000 – ₹50,000', short: '₹20k – ₹50k', min: 20000, max: 50000 },
+  { id: 'p5', label: 'Above ₹50,000', short: 'Above ₹50k', min: 50000, max: Infinity }
+]
 
 /* ------------------------------------------------------------------ */
 /*  Reviews (shared pool, mapped per product deterministically)        */
