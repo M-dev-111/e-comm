@@ -49,7 +49,7 @@ function Confetti () {
 export default function OrderSuccessPage () {
   const order = useMemo(() => {
     try {
-      return JSON.parse(sessionStorage.getItem('bazario.lastOrder'))
+      return JSON.parse(sessionStorage.getItem('mcom.lastOrder'))
     } catch {
       return null
     }
@@ -88,7 +88,7 @@ export default function OrderSuccessPage () {
           transition={{ delay: 0.5, duration: 0.5 }}
           className='mt-2 text-[14.5px] text-slate-500'
         >
-          Thank you for shopping with Bazario. A confirmation email is on its way to your inbox.
+          Thank you for shopping with mCOM. A confirmation email is on its way to your inbox.
         </motion.p>
 
         {/* order card */}

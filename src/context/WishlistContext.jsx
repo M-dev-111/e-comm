@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const WishlistContext = createContext(null)
-const STORAGE_KEY = 'bazario.wishlist.v1'
+const STORAGE_KEY = 'mcom.wishlist.v1'
 
 export function WishlistProvider ({ children }) {
   const [ids, setIds] = useState(() => {

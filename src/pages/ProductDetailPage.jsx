@@ -209,7 +209,7 @@ export default function ProductDetailPage () {
               {product.brand}
               {product.assured && (
                 <span className='inline-flex items-center gap-1 rounded-md bg-royal-50 px-2 py-0.5 text-[10.5px] font-bold normal-case text-royal-600'>
-                  <BadgeCheck className='h-3.5 w-3.5' /> Bazario Verified
+                  <BadgeCheck className='h-3.5 w-3.5' /> mCOM Verified
                 </span>
               )}
             </div>

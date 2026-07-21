@@ -10,7 +10,7 @@ import { getProductById, COUPONS, DELIVERY } from '../data/data'
 
 const CartContext = createContext(null)
 
-const STORAGE_KEY = 'bazario.cart.v1'
+const STORAGE_KEY = 'mcom.cart.v1'
 
 const keyOf = (id, size, color) => `${id}::${size || '-'}::${color || '-'}`
 

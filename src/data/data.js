@@ -1,5 +1,5 @@
 /* ================================================================== */
-/*  FLIPZO — static data layer                                         */
+/*  mCOM — static data layer                                           */
 /*  Every piece of content in the app lives here. Swap freely.         */
 /* ================================================================== */
 
@@ -458,7 +458,7 @@ export const PRODUCTS = [
 ]
 
 /* ------------------------------------------------------------------ */
-/*  Quick commerce — Bazario Minutes                                    */
+/*  Quick commerce — mCOM Dash                                        */
 /* ------------------------------------------------------------------ */
 
 export const QUICK_CATEGORIES = [

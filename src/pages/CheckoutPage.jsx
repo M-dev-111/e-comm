@@ -279,7 +279,7 @@ export default function CheckoutPage () {
     }
     // simulate a payment round-trip, then hand off to the success page
     setTimeout(() => {
-      sessionStorage.setItem('bazario.lastOrder', JSON.stringify(order))
+      sessionStorage.setItem('mcom.lastOrder', JSON.stringify(order))
       cart.clear()
       navigate('/order-success', { replace: true })
     }, 1600)

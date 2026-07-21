@@ -73,12 +73,12 @@ export default function AuthModal ({ open, onClose }) {
               <div className='hidden flex-col justify-between bg-linear-to-b from-royal-700 to-royal-900 p-7 text-white sm:flex'>
                 <div>
                   <h2 className='font-display text-[22px] font-bold leading-snug'>
-                    {mode === 'login' ? 'Welcome back' : 'Join Bazario'}
+                    {mode === 'login' ? 'Welcome back' : 'Join mCOM'}
                   </h2>
                   <p className='mt-3 text-[13px] leading-relaxed text-white/65'>
                     {mode === 'login'
                       ? 'Get access to your orders, wishlist and personalised recommendations.'
-                      : 'Sign up to start your shopping journey with Bazario.'}
+                      : 'Sign up to start your shopping journey with mCOM.'}
                   </p>
                 </div>
                 <div className='space-y-2.5 text-[12px] text-white/55'>
@@ -139,7 +139,7 @@ export default function AuthModal ({ open, onClose }) {
                       {error && <p className='mt-2.5 text-[12px] font-semibold text-rose-500'>{error}</p>}
 
                       <p className='mt-4 text-[11px] leading-relaxed text-slate-400'>
-                        By continuing, you agree to Bazario's Terms of Use and Privacy Policy.
+                        By continuing, you agree to mCOM's Terms of Use and Privacy Policy.
                       </p>
 
                       <button
@@ -157,7 +157,7 @@ export default function AuthModal ({ open, onClose }) {
                         }}
                         className='mt-5 w-full text-center text-[12.5px] font-bold text-royal-600 transition-colors hover:text-royal-800'
                       >
-                        {mode === 'login' ? 'New to Bazario? Create an account' : 'Existing user? Log in'}
+                        {mode === 'login' ? 'New to mCOM? Create an account' : 'Existing user? Log in'}
                       </button>
                     </motion.form>
                   ) : (

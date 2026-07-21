@@ -3,7 +3,7 @@
 @import 'tailwindcss';
 
 /* ================================================================
-   FLIPZO design tokens — Royal Blue × Olive Green
+   mCOM design tokens — Royal Blue × Olive Green
    ================================================================ */
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;

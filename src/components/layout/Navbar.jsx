@@ -278,10 +278,10 @@ export default function Navbar () {
                 whileHover={{ rotate: -8, scale: 1.06 }}
                 className='grid h-9 w-9 place-items-center rounded-full bg-olive-500 font-display text-lg font-extrabold text-white shadow-glow-olive'
               >
-                B
+                m
               </motion.span>
               <span className='hidden font-display text-[18px] font-extrabold tracking-tight text-white min-[400px]:block'>
-                bazario
+                <span className='text-olive-400'>m</span>COM
               </span>
             </Link>
 

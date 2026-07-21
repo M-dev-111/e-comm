@@ -30,7 +30,7 @@ function QuickHero () {
           className='max-w-2xl'
         >
           <p className='inline-flex items-center gap-2 rounded-full border border-olive-400/40 bg-olive-400/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-olive-200'>
-            <Sparkles className='h-3.5 w-3.5' /> Bazario Dash
+            <Sparkles className='h-3.5 w-3.5' /> mCOM Dash
           </p>
           <h1 className='mt-4 font-display text-[clamp(30px,5vw,56px)] font-extrabold leading-[1.04] tracking-tight text-white'>
             Groceries in{' '}

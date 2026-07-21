@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 /** Static auth — a "logged in" user persisted to localStorage. */
 
 const AuthContext = createContext(null)
-const STORAGE_KEY = 'bazario.auth.v1'
+const STORAGE_KEY = 'mcom.auth.v1'
 
 export function AuthProvider ({ children }) {
   const [user, setUser] = useState(() => {

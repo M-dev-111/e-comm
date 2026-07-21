@@ -10,7 +10,7 @@ const TRUST = [
 
 const LINKS = [
   ['Shop', ['Electronics', 'Fashion', 'Footwear', 'Home & Living', 'Beauty']],
-  ['About', ['Company', 'Careers', 'Press', 'Bazario Stories', 'Corporate info']],
+  ['About', ['Company', 'Careers', 'Press', 'mCOM Stories', 'Corporate info']],
   ['Help', ['Payments', 'Shipping', 'Cancellations', 'Returns', 'FAQ']],
   ['Policy', ['Return policy', 'Terms of use', 'Security', 'Privacy', 'Sitemap']]
 ]
@@ -38,10 +38,10 @@ export default function Footer () {
           <div className='max-w-sm'>
             <Link to='/' className='flex items-center gap-2'>
               <span className='grid h-9 w-9 place-items-center rounded-xl bg-linear-to-br from-royal-500 to-royal-700 font-display text-lg font-extrabold'>
-                F
+                m
               </span>
               <span className='font-display text-xl font-extrabold tracking-tight'>
-                bazario<span className='text-olive-400'>.</span>
+                <span className='text-olive-400'>m</span>COM
               </span>
             </Link>
             <p className='mt-4 text-[13px] leading-relaxed text-white/50'>
@@ -73,7 +73,7 @@ export default function Footer () {
         </div>
 
         <div className='mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 sm:flex-row sm:items-center sm:justify-between'>
-          <span>© 2026 Bazario Internet Pvt. Ltd. All rights reserved. Demonstration build — orders are simulated.</span>
+          <span>© 2026 mCOM Internet Pvt. Ltd. All rights reserved. Demonstration build — orders are simulated.</span>
           <span>Registered office: Kolkata, India</span>
         </div>
       </div>
