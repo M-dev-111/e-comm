@@ -505,7 +505,7 @@ export const QUICK_PRODUCTS = [
 export const HERO_SLIDES = [
   {
     id: 'h1',
-    kicker: 'BIG SAVING DAYS',
+    kicker: 'MEGA SAVINGS WEEK',
     title: 'Up to 70% off\nheadphones & audio',
     sub: 'Sonicwave · Bose · boAt and more',
     cta: 'Shop Electronics',
