@@ -1,0 +1,23 @@
+# Netlify deployment config for mCOM (Vite + React Router SPA)
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 needs Node ^20.19 || >=22.12
+  NODE_VERSION = "22"
+
+# SPA fallback: React Router owns /cart, /product/:id, etc.
+# Netlify serves real files (/assets/*, /favicon.svg) first, so this
+# only catches paths that don't exist on disk.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Hashed bundles never change contents — cache them hard.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
