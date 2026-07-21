@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sora:wght@400;500;600;700;800&display=swap');
+
+@import 'tailwindcss';
+
+/* ================================================================
+   FLIPZO design tokens — Royal Blue × Olive Green
+   ================================================================ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Royal blue — primary brand */
+  --color-royal-50: #eef2ff;
+  --color-royal-100: #dfe7fd;
+  --color-royal-200: #c4d2fa;
+  --color-royal-300: #9ab3f5;
+  --color-royal-400: #6b8bee;
+  --color-royal-500: #4667e5;
+  --color-royal-600: #2f49d3;
+  --color-royal-700: #2739ae;
+  --color-royal-800: #24308c;
+  --color-royal-900: #222c6f;
+  --color-royal-950: #141a44;
+
+  /* Olive green — accent */
+  --color-olive-50: #f8f9ec;
+  --color-olive-100: #eef1d4;
+  --color-olive-200: #dde4ac;
+  --color-olive-300: #c5d27b;
+  --color-olive-400: #abbe52;
+  --color-olive-500: #8da336;
+  --color-olive-600: #6d8226;
+  --color-olive-700: #546422;
+  --color-olive-800: #445020;
+  --color-olive-900: #3a451f;
+  --color-olive-950: #1e250c;
+
+  --shadow-card: 0 1px 2px rgb(20 26 68 / 0.05), 0 8px 24px -8px rgb(20 26 68 / 0.1);
+  --shadow-card-hover: 0 2px 4px rgb(20 26 68 / 0.06), 0 20px 40px -12px rgb(20 26 68 / 0.22);
+  --shadow-glow-royal: 0 8px 32px -8px rgb(47 73 211 / 0.55);
+  --shadow-glow-olive: 0 8px 32px -8px rgb(109 130 38 / 0.55);
+
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+}
+
+/* ================================================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  background: #f3f5f9;
+  color: #16192b;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-royal-600);
+  color: #fff;
+}
+
+/* slim, theme-tinted scrollbar */
+::-webkit-scrollbar { width: 10px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #c6cbe0;
+  border-radius: 999px;
+  border: 2px solid #f3f5f9;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-royal-400); }
+
+/* hide scrollbars on horizontal rails, keep them scrollable */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* text on hero gradients */
+.text-shadow-hero { text-shadow: 0 2px 24px rgb(0 0 0 / 0.35); }
+
+/* shimmering skeleton for lazy images */
+.img-skeleton {
+  background: linear-gradient(100deg, #e7eaf3 40%, #f6f8fd 50%, #e7eaf3 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* line clamp helpers used everywhere */
+.clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
