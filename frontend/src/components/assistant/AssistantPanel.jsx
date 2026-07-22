@@ -37,7 +37,7 @@ function CriteriaPills ({ criteria }) {
 }
 
 export default function AssistantPanel ({ assistant, onClose }) {
-  const { messages, criteria, typing, draftExtras, sendText, chooseChip, toggleExtra, confirmExtras, reset } = assistant
+  const { messages, criteria, typing, draftExtras, offline, sendText, chooseChip, toggleExtra, confirmExtras, reset } = assistant
   const [draft, setDraft] = useState('')
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
@@ -56,7 +56,8 @@ export default function AssistantPanel ({ assistant, onClose }) {
 
   const submit = e => {
     e.preventDefault()
-    if (!draft.trim()) return
+    // one turn in flight at a time, so replies cannot arrive out of order
+    if (!draft.trim() || typing) return
     sendText(draft)
     setDraft('')
   }
@@ -91,7 +92,9 @@ export default function AssistantPanel ({ assistant, onClose }) {
           </span>
           <div className='min-w-0 flex-1'>
             <p className='font-display text-[14px] font-bold leading-tight'>Shopping Assistant</p>
-            <p className='text-[11px] text-white/50'>Finds the right product by asking</p>
+            <p className='text-[11px] text-white/50'>
+              {offline ? 'Offline — using built-in search' : 'Ask me anything about the catalogue'}
+            </p>
           </div>
           <button
             aria-label='Start over'
@@ -135,14 +138,14 @@ export default function AssistantPanel ({ assistant, onClose }) {
             ref={inputRef}
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            placeholder='Try "phone under 20000"'
+            placeholder={typing ? 'Thinking…' : 'Try "phone under 20000"'}
             aria-label='Message the shopping assistant'
             className='min-w-0 flex-1 bg-transparent text-[12.5px] text-slate-800 outline-none placeholder:text-slate-400'
           />
           <motion.button
             type='submit'
             whileTap={{ scale: 0.9 }}
-            disabled={!draft.trim()}
+            disabled={!draft.trim() || typing}
             aria-label='Send'
             className='grid h-8 w-8 shrink-0 place-items-center rounded-full bg-royal-600 text-white transition-colors hover:bg-royal-700 disabled:bg-slate-200 disabled:text-slate-400'
           >

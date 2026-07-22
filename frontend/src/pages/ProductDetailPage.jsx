@@ -8,7 +8,6 @@ import {
 import { getProductById, getRelated, getReviewsFor, CATEGORIES, COUPONS } from '../data/data'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { useToast } from '../context/ToastContext'
 import { discountPct, deliveryDateLabel } from '../utils/format'
 import { EASE } from '../utils/motion'
 import Img from '../components/ui/Img'
@@ -18,6 +17,7 @@ import AddToCartControl from '../components/product/AddToCartControl'
 import ProductRail from '../components/home/ProductRail'
 import EmptyState from '../components/ui/EmptyState'
 import Container from '../components/ui/Container'
+import { toast } from 'sonner'
 
 function Gallery ({ product }) {
   // remounted via key={product.id}, so `active` resets on product change
@@ -136,7 +136,6 @@ export default function ProductDetailPage () {
   const navigate = useNavigate()
   const cart = useCart()
   const wishlist = useWishlist()
-  const toast = useToast()
 
   // the page remounts per-route (keyed <Routes>), so lazy init is enough
   const [size, setSize] = useState(() => product?.sizes?.[0] || null)
@@ -270,7 +269,8 @@ export default function ProductDetailPage () {
             <button
               onClick={() => {
                 wishlist.toggle(product.id)
-                toast(liked ? 'Removed from wishlist' : 'Saved to wishlist', 'wishlist')
+                if (liked) toast.info('Removed from wishlist')
+                else toast.success('Saved to wishlist')
               }}
               className='mt-5 flex items-center gap-2 text-[13px] font-semibold text-slate-500 transition-colors hover:text-rose-500'
             >

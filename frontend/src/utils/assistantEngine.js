@@ -58,7 +58,9 @@ export function parseMessage (raw) {
 
   // budget phrasing
   const amounts = extractAmounts(text)
-  const wantsUnder = /(under|below|less than|upto|up to|within|max|budget of|cheaper than)/.test(text)
+  /* "nothing over 8000" and "no more than 8k" are ceilings even though they
+     contain over/more — they must be tested before the wantsOver patterns. */
+  const wantsUnder = /(under|below|less than|upto|up to|within|max|budget of|cheaper than|nothing over|nothing above|no more than|not more than|at most)/.test(text)
   const wantsOver = /(above|over|more than|minimum|at least|starting)/.test(text)
   const isRange = /(between|to|-|and)/.test(text) && amounts.length >= 2
 

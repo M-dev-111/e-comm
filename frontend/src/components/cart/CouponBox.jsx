@@ -3,12 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Ticket, X, ChevronDown } from 'lucide-react'
 import { COUPONS } from '../../data/data'
 import { useCart } from '../../context/CartContext'
-import { useToast } from '../../context/ToastContext'
 import { formatINR } from '../../utils/format'
+import { toast } from 'sonner'
 
 export default function CouponBox () {
   const cart = useCart()
-  const toast = useToast()
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [showAll, setShowAll] = useState(false)
@@ -20,7 +19,7 @@ export default function CouponBox () {
     setError('')
     setCode('')
     cart.applyCoupon(c.code)
-    toast(`Coupon ${c.code} applied`, 'coupon')
+    toast.success(`Coupon ${c.code} applied`, { icon: <Ticket className='h-4 w-4' /> })
   }
 
   return (

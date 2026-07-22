@@ -3,14 +3,13 @@ import { Clock } from 'lucide-react'
 import Img from '../ui/Img'
 import QuantityStepper from '../ui/QuantityStepper'
 import { useCart } from '../../context/CartContext'
-import { useToast } from '../../context/ToastContext'
 import { formatINR, discountPct } from '../../utils/format'
 import { fadeUp } from '../../utils/motion'
+import { toast } from 'sonner'
 
 /** Compact grocery card — ADD button morphs into a quantity stepper. */
 export default function QuickProductCard ({ product, index = 0 }) {
   const cart = useCart()
-  const toast = useToast()
   const qty = cart.qtyOf(product.id)
   const lineKey = cart.keyFor(product.id, null, null)
 
@@ -60,7 +59,7 @@ export default function QuickProductCard ({ product, index = 0 }) {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => {
                   cart.add(product.id)
-                  toast(`${product.name} added`)
+                  toast.success(`${product.name} added`)
                 }}
                 className='rounded-xl border border-olive-600 bg-olive-50 px-4 py-2 text-[12px] font-extrabold uppercase tracking-wide text-olive-700 transition-colors hover:bg-olive-600 hover:text-white'
               >

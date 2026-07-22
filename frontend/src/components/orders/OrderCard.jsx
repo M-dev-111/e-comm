@@ -6,8 +6,8 @@ import Img from '../ui/Img'
 import OrderStatusTrail from './OrderStatusTrail'
 import { STATUS_LABELS } from '../../data/orderStatus'
 import { useCart } from '../../context/CartContext'
-import { useToast } from '../../context/ToastContext'
 import { formatINR } from '../../utils/format'
+import { toast } from 'sonner'
 
 const STATUS_STYLES = {
   delivered: 'bg-olive-50 text-olive-700',
@@ -29,14 +29,13 @@ const etaLabel = order => {
 export default function OrderCard ({ order, onCancel }) {
   const [open, setOpen] = useState(false)
   const cart = useCart()
-  const toast = useToast()
 
   const badge = STATUS_STYLES[order.status] || STATUS_STYLES.default
   const canCancel = order.status !== 'delivered' && order.status !== 'cancelled'
 
   const buyAgain = () => {
     order.items.forEach(item => cart.add(item.id, { size: item.size, color: item.color, qty: item.qty }))
-    toast(`${order.items.length} item${order.items.length > 1 ? 's' : ''} added to cart`)
+    toast.success(`${order.items.length} item${order.items.length > 1 ? 's' : ''} added to cart`)
   }
 
   return (

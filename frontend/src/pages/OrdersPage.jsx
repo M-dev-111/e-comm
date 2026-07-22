@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, Package } from 'lucide-react'
 import { useOrders } from '../context/OrdersContext'
 import { useAuth } from '../context/AuthContext'
-import { useToast } from '../context/ToastContext'
 import OrderCard from '../components/orders/OrderCard'
 import EmptyState from '../components/ui/EmptyState'
 import Container from '../components/ui/Container'
 import AuthModal from '../components/auth/AuthModal'
 import { EASE } from '../utils/motion'
+import { toast } from 'sonner'
 
 const FILTERS = [
   { id: 'all', label: 'All orders' },
@@ -26,7 +26,6 @@ const matchesFilter = (order, filter) => {
 export default function OrdersPage () {
   const { orders, cancelOrder } = useOrders()
   const auth = useAuth()
-  const toast = useToast()
   const [filter, setFilter] = useState('all')
   const [authOpen, setAuthOpen] = useState(false)
 
@@ -43,7 +42,7 @@ export default function OrdersPage () {
 
   const handleCancel = id => {
     cancelOrder(id)
-    toast('Order cancelled', 'remove')
+    toast.info('Order cancelled')
   }
 
   if (!auth.user) {

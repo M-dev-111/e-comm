@@ -4,12 +4,11 @@ import { Trash2, Zap } from 'lucide-react'
 import Img from '../ui/Img'
 import QuantityStepper from '../ui/QuantityStepper'
 import { useCart } from '../../context/CartContext'
-import { useToast } from '../../context/ToastContext'
 import { formatINR, discountPct } from '../../utils/format'
+import { toast } from 'sonner'
 
 export default function CartItemRow ({ line }) {
   const cart = useCart()
-  const toast = useToast()
   const p = line.product
   const isQuick = p.id.startsWith('q')
   const image = isQuick ? p.image : p.images[0]
@@ -56,7 +55,7 @@ export default function CartItemRow ({ line }) {
             aria-label='Remove item'
             onClick={() => {
               cart.remove(line.key)
-              toast('Removed from cart', 'remove')
+              toast.info('Removed from cart', { icon: <Trash2 className='h-4 w-4' /> })
             }}
             className='grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-500'
           >

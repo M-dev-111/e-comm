@@ -1,9 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
+import { queryClient } from './lib/queryClient'
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
-import { ToastProvider } from './context/ToastContext'
 import { AuthProvider } from './context/AuthContext'
 import { AddressProvider } from './context/AddressContext'
 import { OrdersProvider } from './context/OrdersContext'
@@ -26,6 +28,12 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage'))
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'))
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'))
 const OrdersPage = lazy(() => import('./pages/OrdersPage'))
+const AiTestPage = lazy(() => import('./pages/AiTestPage'))
+
+/* Query Devtools are dev-only — the import is dropped from production builds. */
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/react-query-devtools').then(m => ({ default: m.ReactQueryDevtools })))
+  : () => null
 
 /** Scroll to top on every route change (mirrors real e-comm behaviour). */
 function ScrollToTop () {
@@ -66,6 +74,7 @@ function AnimatedRoutes () {
         <Route path='/checkout' element={<Page><CheckoutPage /></Page>} />
         <Route path='/order-success' element={<Page><OrderSuccessPage /></Page>} />
         <Route path='/orders' element={<Page><OrdersPage /></Page>} />
+        <Route path='/ai-test' element={<Page><AiTestPage /></Page>} />
         <Route path='*' element={<Page><HomePage /></Page>} />
       </Routes>
     </AnimatePresence>
@@ -74,13 +83,13 @@ function AnimatedRoutes () {
 
 export default function App () {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AddressProvider>
-          <OrdersProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <AddressProvider>
+            <OrdersProvider>
+              <CartProvider>
+                <WishlistProvider>
                   <ScrollToTop />
                   <div className='flex min-h-dvh flex-col'>
                     <Navbar />
@@ -93,12 +102,31 @@ export default function App () {
                       <ShopAssistant />
                     </Suspense>
                   </div>
-                </ToastProvider>
-              </WishlistProvider>
-            </CartProvider>
-          </OrdersProvider>
-        </AddressProvider>
-      </AuthProvider>
-    </BrowserRouter>
+
+                  {/* Sits above BottomNav on mobile so it never covers the tab bar. */}
+                  <Toaster
+                    position='bottom-center'
+                    offset={80}
+                    mobileOffset={88}
+                    duration={2600}
+                    richColors
+                    closeButton
+                    toastOptions={{
+                      classNames: {
+                        toast: 'rounded-full! border-none! bg-royal-950/95! text-white! shadow-2xl! backdrop-blur',
+                        description: 'text-white/70!'
+                      }
+                    }}
+                  />
+                </WishlistProvider>
+              </CartProvider>
+            </OrdersProvider>
+          </AddressProvider>
+        </AuthProvider>
+      </BrowserRouter>
+      <Suspense fallback={null}>
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition='bottom-left' />
+      </Suspense>
+    </QueryClientProvider>
   )
 }

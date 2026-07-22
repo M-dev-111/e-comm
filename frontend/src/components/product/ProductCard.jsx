@@ -6,8 +6,8 @@ import PriceBlock from '../ui/PriceBlock'
 import { RatingBadge } from '../ui/Rating'
 import AddToCartControl from './AddToCartControl'
 import { useWishlist } from '../../context/WishlistContext'
-import { useToast } from '../../context/ToastContext'
 import { fadeUp } from '../../utils/motion'
+import { toast } from 'sonner'
 
 const TAG_STYLES = {
   bestseller: 'bg-amber-400/95 text-amber-950',
@@ -21,7 +21,6 @@ const TAG_LABELS = { bestseller: 'Bestseller', deal: 'Deal', trending: 'Trending
 /** The core product card — used in rails, grids and related sections. */
 export default function ProductCard ({ product, index = 0 }) {
   const wishlist = useWishlist()
-  const toast = useToast()
   const liked = wishlist.has(product.id)
   const tag = product.tags?.[0]
 
@@ -59,7 +58,8 @@ export default function ProductCard ({ product, index = 0 }) {
             onClick={e => {
               e.preventDefault()
               wishlist.toggle(product.id)
-              toast(liked ? 'Removed from wishlist' : 'Saved to wishlist', 'wishlist')
+              if (liked) toast.info('Removed from wishlist')
+              else toast.success('Saved to wishlist', { icon: <Heart className='h-4 w-4' /> })
             }}
             className='absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow backdrop-blur transition-transform hover:scale-110'
           >

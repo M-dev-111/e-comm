@@ -1,7 +1,9 @@
-import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useAddresses } from '../../context/AddressContext'
-import { useToast } from '../../context/ToastContext'
+import { addressSchema } from '../../lib/schemas'
+import { toast } from 'sonner'
 
 const FIELDS = [
   { name: 'name', label: 'Full name', span: true },
@@ -15,54 +17,55 @@ const FIELDS = [
 
 const EMPTY = { name: '', phone: '', pincode: '', line1: '', line2: '', city: '', state: '', type: 'HOME' }
 
-function validate (values) {
-  const errors = {}
-  if (values.name.trim().length < 3) errors.name = 'Enter the full name'
-  if (!/^\d{10}$/.test(values.phone)) errors.phone = 'Enter a 10-digit phone number'
-  if (!/^\d{6}$/.test(values.pincode)) errors.pincode = 'Enter a 6-digit pincode'
-  if (values.line1.trim().length < 4) errors.line1 = 'Enter the flat or building'
-  if (values.city.trim().length < 2) errors.city = 'Enter the city'
-  if (values.state.trim().length < 2) errors.state = 'Enter the state'
-  return errors
-}
-
 /** Adds a delivery address and hands it back so checkout can select it. */
 export default function AddressForm ({ onSaved, onCancel }) {
   const { addAddress } = useAddresses()
-  const toast = useToast()
-  const [values, setValues] = useState(EMPTY)
-  const [errors, setErrors] = useState({})
 
-  const set = (name, value) => {
-    setValues(prev => ({ ...prev, [name]: value }))
-    setErrors(prev => (prev[name] ? { ...prev, [name]: undefined } : prev))
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    setValue,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    resolver: zodResolver(addressSchema),
+    defaultValues: EMPTY,
+    mode: 'onTouched'
+  })
+
+  // useWatch (not watch()) so only this subscription re-renders, and so the
+  // React Compiler can still optimise the component.
+  const type = useWatch({ control, name: 'type' })
+
+  /* zod has already trimmed every string by the time this runs, so the
+     submit handler only has to format the phone for display. */
+  const submit = values => {
+    const saved = addAddress({ ...values, phone: `+91 ${values.phone}` })
+    toast.success('Address saved')
+    reset(EMPTY)
+    onSaved?.(saved)
   }
 
-  const submit = e => {
-    e.preventDefault()
-    const found = validate(values)
-    setErrors(found)
-    if (Object.keys(found).length) return
-
-    const saved = addAddress({
-      ...values,
-      name: values.name.trim(),
-      phone: `+91 ${values.phone}`,
-      line1: values.line1.trim(),
-      line2: values.line2.trim(),
-      city: values.city.trim(),
-      state: values.state.trim()
-    })
-    toast('Address saved')
-    setValues(EMPTY)
-    onSaved?.(saved)
+  /** Numeric fields strip non-digits as you type. */
+  const fieldProps = field => {
+    const { onChange, ...rest } = register(field.name)
+    if (field.inputMode !== 'numeric') return { ...rest, onChange }
+    return {
+      ...rest,
+      onChange: e => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, field.maxLength)
+        return onChange(e)
+      }
+    }
   }
 
   return (
     <motion.form
-      onSubmit={submit}
+      onSubmit={handleSubmit(submit)}
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
+      noValidate
       className='rounded-2xl border border-slate-200 bg-white p-4 shadow-card'
     >
       <p className='mb-3 text-[11.5px] font-bold uppercase tracking-wide text-slate-400'>New delivery address</p>
@@ -71,20 +74,16 @@ export default function AddressForm ({ onSaved, onCancel }) {
         {FIELDS.map(field => (
           <div key={field.name} className={field.span ? 'sm:col-span-2' : ''}>
             <input
-              value={values[field.name]}
+              {...fieldProps(field)}
               inputMode={field.inputMode}
               maxLength={field.maxLength}
-              onChange={e =>
-                set(field.name, field.inputMode === 'numeric' ? e.target.value.replace(/\D/g, '') : e.target.value)
-              }
               placeholder={field.label}
               aria-label={field.label}
-              className={`w-full rounded-xl border px-3.5 py-2.5 text-[13px] outline-none transition-colors ${
-                errors[field.name] ? 'border-rose-400 bg-rose-50/40' : 'border-slate-200 focus:border-royal-400'
-              }`}
+              aria-invalid={!!errors[field.name]}
+              className='w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-royal-400 aria-invalid:border-rose-400 aria-invalid:bg-rose-50/40'
             />
             {errors[field.name] && (
-              <p className='mt-1 text-[11px] font-semibold text-rose-500'>{errors[field.name]}</p>
+              <p className='mt-1 text-[11px] font-semibold text-rose-500'>{errors[field.name].message}</p>
             )}
           </div>
         ))}
@@ -92,16 +91,16 @@ export default function AddressForm ({ onSaved, onCancel }) {
 
       <div className='mt-3 flex items-center gap-2'>
         <span className='text-[12px] font-semibold text-slate-500'>Save as</span>
-        {['HOME', 'WORK', 'OTHER'].map(type => (
+        {['HOME', 'WORK', 'OTHER'].map(option => (
           <button
-            key={type}
+            key={option}
             type='button'
-            onClick={() => set('type', type)}
+            onClick={() => setValue('type', option, { shouldDirty: true })}
             className={`rounded-lg px-3 py-1.5 text-[11.5px] font-bold transition-colors ${
-              values.type === type ? 'bg-royal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              type === option ? 'bg-royal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            {type}
+            {option}
           </button>
         ))}
       </div>
@@ -109,7 +108,8 @@ export default function AddressForm ({ onSaved, onCancel }) {
       <div className='mt-4 flex gap-2'>
         <button
           type='submit'
-          className='rounded-xl bg-royal-600 px-5 py-2.5 text-[12.5px] font-bold text-white shadow-glow-royal transition-colors hover:bg-royal-700'
+          disabled={isSubmitting}
+          className='rounded-xl bg-royal-600 px-5 py-2.5 text-[12.5px] font-bold text-white shadow-glow-royal transition-colors hover:bg-royal-700 disabled:opacity-60'
         >
           Save and deliver here
         </button>

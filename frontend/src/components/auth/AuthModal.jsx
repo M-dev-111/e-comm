@@ -1,10 +1,19 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Lock, ShieldCheck, Smartphone, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { useToast } from '../../context/ToastContext'
+import { makeAuthSchema, otpSchema } from '../../lib/schemas'
 import { EASE } from '../../utils/motion'
+import { toast } from 'sonner'
+
+/** Shared inline field error. */
+function FieldError ({ children }) {
+  if (!children) return null
+  return <p className='mt-1.5 text-[12px] font-semibold text-rose-500'>{children}</p>
+}
 
 /**
  * Two-panel auth modal.
@@ -12,41 +21,57 @@ import { EASE } from '../../utils/motion'
  */
 export default function AuthModal ({ open, onClose }) {
   const auth = useAuth()
-  const toast = useToast()
 
   const [mode, setMode] = useState('login') // login | signup
   const [step, setStep] = useState('form') // form | otp
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
-  const [error, setError] = useState('')
 
-  const reset = () => {
+  const detailsForm = useForm({
+    resolver: zodResolver(makeAuthSchema(mode)),
+    defaultValues: { name: '', phone: '' },
+    mode: 'onTouched'
+  })
+
+  const otpForm = useForm({
+    resolver: zodResolver(otpSchema),
+    defaultValues: { otp: '' },
+    mode: 'onSubmit'
+  })
+
+  // useWatch (not watch()) keeps the component compiler-optimisable.
+  const phone = useWatch({ control: detailsForm.control, name: 'phone' })
+
+  const backToDetails = () => {
     setStep('form')
-    setOtp('')
-    setError('')
+    otpForm.reset()
   }
 
   const close = () => {
-    reset()
+    setStep('form')
+    detailsForm.reset()
+    otpForm.reset()
     onClose()
   }
 
-  const requestOtp = e => {
-    e.preventDefault()
-    if (mode === 'signup' && name.trim().length < 2) return setError('Please enter your full name')
-    if (!/^\d{10}$/.test(phone)) return setError('Please enter a valid 10-digit mobile number')
-    setError('')
-    setStep('otp')
+  const requestOtp = () => setStep('otp')
+
+  const verifyOtp = () => {
+    const { name, phone: mobile } = detailsForm.getValues()
+    const displayName = mode === 'signup' ? name.trim() : `User ${mobile.slice(-4)}`
+    auth.login(displayName, mobile)
+    toast.success(`Welcome, ${displayName.split(' ')[0]}`)
+    close()
   }
 
-  const verifyOtp = e => {
-    e.preventDefault()
-    if (!/^\d{6}$/.test(otp)) return setError('Please enter the 6-digit OTP')
-    const displayName = mode === 'signup' ? name.trim() : `User ${phone.slice(-4)}`
-    auth.login(displayName, phone)
-    toast(`Welcome, ${displayName.split(' ')[0]}`)
-    close()
+  /** Digits-only input masks, applied on top of RHF's register(). */
+  const digitsOnly = (form, field, max) => {
+    const { onChange, ...rest } = form.register(field)
+    return {
+      ...rest,
+      onChange: e => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, max)
+        return onChange(e)
+      }
+    }
   }
 
   // portal to <body> so sticky/filtered ancestors can't offset the fixed overlay
@@ -105,11 +130,12 @@ export default function AuthModal ({ open, onClose }) {
                   {step === 'form' ? (
                     <motion.form
                       key='form'
-                      onSubmit={requestOtp}
+                      onSubmit={detailsForm.handleSubmit(requestOtp)}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.25 }}
+                      noValidate
                     >
                       <h3 className='font-display text-lg font-bold text-slate-900 sm:hidden'>
                         {mode === 'login' ? 'Login' : 'Create account'}
@@ -117,26 +143,30 @@ export default function AuthModal ({ open, onClose }) {
 
                       <div className='mt-4 space-y-3.5 sm:mt-2'>
                         {mode === 'signup' && (
-                          <input
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            placeholder='Full name'
-                            className='w-full rounded-xl border border-slate-200 px-4 py-3 text-[13.5px] outline-none transition-colors focus:border-royal-400'
-                          />
+                          <div>
+                            <input
+                              {...detailsForm.register('name')}
+                              placeholder='Full name'
+                              aria-invalid={!!detailsForm.formState.errors.name}
+                              className='w-full rounded-xl border border-slate-200 px-4 py-3 text-[13.5px] outline-none transition-colors focus:border-royal-400 aria-invalid:border-rose-400'
+                            />
+                            <FieldError>{detailsForm.formState.errors.name?.message}</FieldError>
+                          </div>
                         )}
-                        <div className='flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 transition-colors focus-within:border-royal-400'>
-                          <span className='text-[13.5px] font-semibold text-slate-500'>+91</span>
-                          <input
-                            value={phone}
-                            onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                            placeholder='Mobile number'
-                            inputMode='numeric'
-                            className='w-full text-[13.5px] outline-none'
-                          />
+                        <div>
+                          <div className='flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 transition-colors focus-within:border-royal-400 has-aria-invalid:border-rose-400'>
+                            <span className='text-[13.5px] font-semibold text-slate-500'>+91</span>
+                            <input
+                              {...digitsOnly(detailsForm, 'phone', 10)}
+                              placeholder='Mobile number'
+                              inputMode='numeric'
+                              aria-invalid={!!detailsForm.formState.errors.phone}
+                              className='w-full text-[13.5px] outline-none'
+                            />
+                          </div>
+                          <FieldError>{detailsForm.formState.errors.phone?.message}</FieldError>
                         </div>
                       </div>
-
-                      {error && <p className='mt-2.5 text-[12px] font-semibold text-rose-500'>{error}</p>}
 
                       <p className='mt-4 text-[11px] leading-relaxed text-slate-400'>
                         By continuing, you agree to mCOM's Terms of Use and Privacy Policy.
@@ -153,7 +183,7 @@ export default function AuthModal ({ open, onClose }) {
                         type='button'
                         onClick={() => {
                           setMode(m => (m === 'login' ? 'signup' : 'login'))
-                          setError('')
+                          detailsForm.clearErrors()
                         }}
                         className='mt-5 w-full text-center text-[12.5px] font-bold text-royal-600 transition-colors hover:text-royal-800'
                       >
@@ -163,15 +193,16 @@ export default function AuthModal ({ open, onClose }) {
                   ) : (
                     <motion.form
                       key='otp'
-                      onSubmit={verifyOtp}
+                      onSubmit={otpForm.handleSubmit(verifyOtp)}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.25 }}
+                      noValidate
                     >
                       <button
                         type='button'
-                        onClick={reset}
+                        onClick={backToDetails}
                         className='flex items-center gap-1.5 text-[12.5px] font-bold text-slate-500 transition-colors hover:text-slate-800'
                       >
                         <ArrowLeft className='h-4 w-4' /> Back
@@ -188,15 +219,15 @@ export default function AuthModal ({ open, onClose }) {
                       </div>
 
                       <input
-                        value={otp}
-                        onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        {...digitsOnly(otpForm, 'otp', 6)}
                         placeholder='6-digit OTP'
                         inputMode='numeric'
                         autoFocus
-                        className='mt-5 w-full rounded-xl border border-slate-200 px-4 py-3 text-center text-[16px] font-bold tracking-[0.4em] outline-none transition-colors focus:border-royal-400'
+                        aria-invalid={!!otpForm.formState.errors.otp}
+                        className='mt-5 w-full rounded-xl border border-slate-200 px-4 py-3 text-center text-[16px] font-bold tracking-[0.4em] outline-none transition-colors focus:border-royal-400 aria-invalid:border-rose-400'
                       />
 
-                      {error && <p className='mt-2.5 text-[12px] font-semibold text-rose-500'>{error}</p>}
+                      <FieldError>{otpForm.formState.errors.otp?.message}</FieldError>
 
                       <button
                         type='submit'

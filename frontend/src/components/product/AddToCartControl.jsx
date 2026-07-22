@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ShoppingCart } from 'lucide-react'
 import QuantityStepper from '../ui/QuantityStepper'
 import { useCart } from '../../context/CartContext'
-import { useToast } from '../../context/ToastContext'
+import { toast } from 'sonner'
 
 /**
  * "Add to Cart" until the item is in the cart, then a − / + stepper.
@@ -14,7 +14,6 @@ import { useToast } from '../../context/ToastContext'
  */
 export default function AddToCartControl ({ product, size, color, variant = 'card' }) {
   const cart = useCart()
-  const toast = useToast()
 
   const chosenSize = size ?? product.sizes?.[0] ?? null
   const chosenColor = color ?? product.colors?.[0] ?? null
@@ -30,12 +29,12 @@ export default function AddToCartControl ({ product, size, color, variant = 'car
   const add = e => {
     stop(e)
     cart.add(product.id, { size: chosenSize, color: chosenColor })
-    toast(`${product.brand} added to cart`)
+    toast.success(`${product.brand} added to cart`)
   }
 
   const setQty = next => {
     cart.setQty(key, next)
-    if (next === 0) toast('Removed from cart', 'remove')
+    if (next === 0) toast.info('Removed from cart')
   }
 
   const isLarge = variant === 'detail'
