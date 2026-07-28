@@ -74,7 +74,9 @@ export default function Footer () {
 
         <div className='mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 sm:flex-row sm:items-center sm:justify-between'>
           <span>© 2026 mCOM Internet Pvt. Ltd. All rights reserved. Demonstration build — orders are simulated.</span>
-          <span>Registered office: Kolkata, India</span>
+          <Link to='/portal' className='font-semibold text-olive-300 transition-colors hover:text-olive-200'>
+            Business portal — Sign in →
+          </Link>
         </div>
       </div>
     </footer>

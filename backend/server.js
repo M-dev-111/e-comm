@@ -1,43 +1,24 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import compression from "compression";
-import morgan from "morgan";
-
 import { env } from "./config/env.js";
-import aiRoute from "./routes/ai.js";
-import { notFound, errorHandler } from "./middleware/validate.js";
+import { connectDB } from "./config/db.js";
+import { createApp } from "./app.js";
+import { seed, credentialsBanner } from "./seed.js";
 
-const app = express();
+async function start () {
+    const { usingMemory } = await connectDB();
 
-// Trust the proxy so express-rate-limit sees real client IPs behind Render/Fly/Nginx.
-app.set("trust proxy", 1);
-
-app.use(helmet());
-app.use(compression());
-app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
-
-/* Allowlist instead of a blanket cors() — otherwise any site on the internet
-   could proxy through this server and drain the Gemini quota. */
-app.use(cors({
-    origin (origin, callback) {
-        // Same-origin, curl, and server-to-server calls send no Origin header.
-        if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
-        const err = new Error(`Origin not allowed by CORS: ${origin}`);
-        err.status = 403;
-        callback(err);
+    // The in-memory DB is empty on every boot, so seed it automatically and
+    // print the demo logins. A real database is only seeded via `npm run seed`.
+    if (usingMemory) {
+        const result = await seed();
+        if (!result.skipped) console.log("✔  Seeded demo data.");
+        console.log(credentialsBanner());
     }
-}));
 
-app.use(express.json({ limit: "100kb" }));
+    const app = createApp();
+    app.listen(env.PORT, () => console.log(`✔  mCOM API running on http://localhost:${env.PORT}`));
+}
 
-app.get("/", (_req, res) => {
-    res.json({ message: "Server is running!", env: env.NODE_ENV });
+start().catch(err => {
+    console.error("Failed to start server:", err);
+    process.exit(1);
 });
-
-app.use("/api/ai", aiRoute);
-
-app.use(notFound);
-app.use(errorHandler);
-
-app.listen(env.PORT, () => console.log(`Server running on port ${env.PORT}`));

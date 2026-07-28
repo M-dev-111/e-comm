@@ -27,7 +27,36 @@ const envSchema = z.object({
     PORT: z.coerce.number().int().positive().default(5000),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     // Comma-separated list of allowed browser origins.
-    CORS_ORIGIN: z.string().default("http://localhost:5173")
+    CORS_ORIGIN: z.string().default("http://localhost:5173"),
+
+    /* Database. "memory" spins up an in-process MongoDB (dev/demo only —
+       data resets on restart, auto-seeded on boot). For real use, point this
+       at a local mongod or a MongoDB Atlas connection string. */
+    MONGO_URI: z.string().min(1).default("memory"),
+
+    /* Auth. JWT_SECRET MUST be set to a long random string in production;
+       the insecure default is rejected when NODE_ENV=production below. */
+    JWT_SECRET: z.string().min(1).default("dev-only-insecure-change-me"),
+    JWT_EXPIRES: z.string().default("7d"),
+
+    /* First super admin, created by the seed script if it does not exist. */
+    SUPERADMIN_EMAIL: z.string().email().default("super@mcom.dev"),
+    SUPERADMIN_PASSWORD: z.string().min(6).default("super1234")
+}).superRefine((val, ctx) => {
+    if (val.NODE_ENV === "production" && val.JWT_SECRET === "dev-only-insecure-change-me") {
+        ctx.addIssue({
+            path: ["JWT_SECRET"],
+            code: "custom",
+            message: "JWT_SECRET must be set to a strong secret in production."
+        });
+    }
+    if (val.NODE_ENV === "production" && val.MONGO_URI === "memory") {
+        ctx.addIssue({
+            path: ["MONGO_URI"],
+            code: "custom",
+            message: "MONGO_URI cannot be 'memory' in production — use a real MongoDB URI."
+        });
+    }
 });
 
 const parsed = envSchema.safeParse(process.env);

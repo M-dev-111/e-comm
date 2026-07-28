@@ -30,6 +30,10 @@ const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'))
 const OrdersPage = lazy(() => import('./pages/OrdersPage'))
 const AiTestPage = lazy(() => import('./pages/AiTestPage'))
 
+/* The entire multi-tenant SaaS portal loads on demand — none of its code
+   (auth, tables, forms) touches the public storefront bundle. */
+const PortalApp = lazy(() => import('./portal/PortalApp'))
+
 /* Query Devtools are dev-only — the import is dropped from production builds. */
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() => import('@tanstack/react-query-devtools').then(m => ({ default: m.ReactQueryDevtools })))
@@ -81,6 +85,23 @@ function AnimatedRoutes () {
   )
 }
 
+/** The public storefront shell — navbar, footer, assistant, and its routes. */
+function StorefrontShell () {
+  return (
+    <div className='flex min-h-dvh flex-col'>
+      <Navbar />
+      <div className='flex-1'>
+        <AnimatedRoutes />
+      </div>
+      <Footer />
+      <BottomNav />
+      <Suspense fallback={null}>
+        <ShopAssistant />
+      </Suspense>
+    </div>
+  )
+}
+
 export default function App () {
   return (
     <QueryClientProvider client={queryClient}>
@@ -91,17 +112,20 @@ export default function App () {
               <CartProvider>
                 <WishlistProvider>
                   <ScrollToTop />
-                  <div className='flex min-h-dvh flex-col'>
-                    <Navbar />
-                    <div className='flex-1'>
-                      <AnimatedRoutes />
-                    </div>
-                    <Footer />
-                    <BottomNav />
-                    <Suspense fallback={null}>
-                      <ShopAssistant />
-                    </Suspense>
-                  </div>
+
+                  {/* The SaaS portal owns its own full-screen chrome, so it is a
+                      sibling of the storefront rather than nested inside it. */}
+                  <Routes>
+                    <Route
+                      path='/portal/*'
+                      element={
+                        <Suspense fallback={<div className='grid min-h-dvh place-items-center bg-slate-50 text-sm text-slate-400'>Loading portal…</div>}>
+                          <PortalApp />
+                        </Suspense>
+                      }
+                    />
+                    <Route path='/*' element={<StorefrontShell />} />
+                  </Routes>
 
                   {/* Sits above BottomNav on mobile so it never covers the tab bar. */}
                   <Toaster
