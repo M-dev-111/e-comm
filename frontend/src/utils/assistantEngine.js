@@ -1,12 +1,18 @@
 /* ==================================================================
    Shopping assistant engine — pure functions, no React, no network.
 
-   parseMessage()  free text  → whatever criteria it can confidently extract
-   rankProducts()  criteria   → scored matches (relaxing filters if needed)
-   reasonsFor()    product    → short human explanations of the match
+   The catalogue itself now lives in the backend (see hooks/useProducts.js),
+   so every function that used to read a static PRODUCTS import instead takes
+   `products` as its first argument — the caller (useAssistant) supplies the
+   live catalogue from its own useCatalogue() hook. Everything else here stays
+   a pure function of its arguments.
+
+   parseMessage()  free text            → whatever criteria it can confidently extract
+   rankProducts()  products, criteria   → scored matches (relaxing filters if needed)
+   reasonsFor()    product, criteria    → short human explanations of the match
    ================================================================== */
 
-import { PRODUCTS, BRANDS, CATEGORIES, PRICE_BUCKETS } from '../data/data'
+import { BRANDS, CATEGORIES, PRICE_BUCKETS } from '../data/data'
 import { CATEGORY_SYNONYMS, GROCERY_WORDS, PRIORITIES, DEFAULT_PRIORITIES } from '../data/assistant'
 import { discountPct, formatINR } from './format'
 
@@ -99,7 +105,7 @@ export function parseMessage (raw) {
 /*  Options offered at each step, derived from real inventory          */
 /* ------------------------------------------------------------------ */
 
-const inCategory = category => PRODUCTS.filter(p => !category || p.category === category)
+const inCategory = (products, category) => products.filter(p => !category || p.category === category)
 
 export const categoryLabel = id => CATEGORIES.find(c => c.id === id)?.label || id
 
@@ -122,15 +128,15 @@ export function budgetLabel (budget) {
 }
 
 /** Brands that actually have stock in this category, most listings first. */
-export function brandsFor (category) {
+export function brandsFor (products, category) {
   const counts = new Map()
-  inCategory(category).forEach(p => counts.set(p.brand, (counts.get(p.brand) || 0) + 1))
+  inCategory(products, category).forEach(p => counts.set(p.brand, (counts.get(p.brand) || 0) + 1))
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([brand]) => brand)
 }
 
 /** Only offer price bands that contain something. */
-export function bucketsFor (category, brand) {
-  const list = inCategory(category).filter(p => !brand || brand === 'any' || p.brand === brand)
+export function bucketsFor (products, category, brand) {
+  const list = inCategory(products, category).filter(p => !brand || brand === 'any' || p.brand === brand)
   return PRICE_BUCKETS.filter(b => list.some(p => p.price >= b.min && p.price < b.max))
 }
 
@@ -180,8 +186,8 @@ function scoreProduct (product, criteria) {
 /** Present the score as a friendly percentage without ever promising 100%. */
 const toMatchPercent = score => Math.max(62, Math.min(98, Math.round(60 + (score / 70) * 38)))
 
-function applyFilters (criteria, { useExtras = true, useBudget = true, useBrand = true } = {}) {
-  let list = inCategory(criteria.category)
+function applyFilters (products, criteria, { useExtras = true, useBudget = true, useBrand = true } = {}) {
+  let list = inCategory(products, criteria.category)
 
   if (useBrand && criteria.brand && criteria.brand !== 'any') {
     list = list.filter(p => p.brand === criteria.brand)
@@ -205,7 +211,7 @@ function applyFilters (criteria, { useExtras = true, useBudget = true, useBrand 
  * budget → brand) and report what was dropped, so the assistant can say so
  * instead of showing an empty result.
  */
-export function rankProducts (criteria, limit = 3) {
+export function rankProducts (products, criteria, limit = 3) {
   const attempts = [
     { opts: {}, relaxed: null },
     { opts: { useExtras: false }, relaxed: 'extras' },
@@ -214,7 +220,7 @@ export function rankProducts (criteria, limit = 3) {
   ]
 
   for (const attempt of attempts) {
-    const list = applyFilters(criteria, attempt.opts)
+    const list = applyFilters(products, criteria, attempt.opts)
     if (list.length) {
       const scored = list
         .map(product => ({ product, score: scoreProduct(product, criteria) }))

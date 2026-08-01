@@ -232,7 +232,7 @@ export default function CheckoutPage () {
           </span>
           <h1 className='mt-5 font-display text-xl font-bold text-slate-900'>Login to place your order</h1>
           <p className='mt-2 text-[13px] leading-relaxed text-slate-500'>
-            You need to be logged in before checking out. Any valid 10-digit number and 6-digit OTP
+            You need to be logged in before checking out. Any valid email and 6-digit OTP
             works in this demo.
           </p>
           <button
@@ -251,6 +251,10 @@ export default function CheckoutPage () {
         <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
       </Container>
     )
+  }
+
+  if (cart.isLoading) {
+    return <div className='min-h-[60vh]' />
   }
 
   if (cart.lines.length === 0 && !placing) {

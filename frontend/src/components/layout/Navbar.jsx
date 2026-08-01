@@ -5,7 +5,8 @@ import {
   ChevronDown, Heart, LogOut, MapPin, Package, Search, ShoppingCart,
   User, Zap
 } from 'lucide-react'
-import { PRODUCTS, CATEGORIES } from '../../data/data'
+import { CATEGORIES } from '../../data/data'
+import { useCatalogue } from '../../hooks/useProducts'
 import { formatINR } from '../../utils/format'
 import { useCart } from '../../context/CartContext'
 import { useWishlist } from '../../context/WishlistContext'
@@ -38,17 +39,18 @@ function SearchBox () {
   const [open, setOpen] = useState(false)
   const boxRef = useRef(null)
   const navigate = useNavigate()
+  const { data: products = [] } = useCatalogue()
 
   const results = useMemo(() => {
     const s = q.trim().toLowerCase()
     if (s.length < 2) return []
-    return PRODUCTS.filter(
+    return products.filter(
       p =>
         p.name.toLowerCase().includes(s) ||
         p.brand.toLowerCase().includes(s) ||
         p.category.toLowerCase().includes(s)
     ).slice(0, 6)
-  }, [q])
+  }, [q, products])
 
   useEffect(() => {
     const onClick = e => {
@@ -177,7 +179,7 @@ function UserMenu ({ onLogin }) {
           >
             <div className='border-b border-slate-100 px-4 py-3'>
               <p className='text-[13px] font-bold text-slate-900'>{auth.user.name}</p>
-              <p className='text-[11.5px] text-slate-400'>+91 {auth.user.phone}</p>
+              <p className='text-[11.5px] text-slate-400'>{auth.user.email}</p>
             </div>
             <div className='p-1.5'>
               <Link

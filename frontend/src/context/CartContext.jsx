@@ -1,11 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
-import { getProductById, COUPONS, DELIVERY } from '../data/data'
+import { getQuickProductById, COUPONS, DELIVERY } from '../data/data'
+import { useCatalogue } from '../hooks/useProducts'
 
 /**
  * Cart state — persisted to localStorage.
  * Items are stored as { key, id, qty, size, color } where `key` is a
  * composite of id + chosen variant so the same product in two sizes
- * lives as two separate cart lines.
+ * lives as two separate cart lines. A quick-commerce item's id is
+ * prefixed "q" and resolves against the static QUICK_PRODUCTS list;
+ * everything else resolves against the backend catalogue.
  */
 
 const CartContext = createContext(null)
@@ -19,9 +22,10 @@ function load () {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { items: [], coupon: null }
     const parsed = JSON.parse(raw)
-    // drop items whose product no longer exists in data.js
+    // Existence is verified once the catalogue loads (see the prune effect
+    // below) — checking here would wrongly drop items before the first fetch.
     return {
-      items: (parsed.items || []).filter(it => getProductById(it.id)),
+      items: Array.isArray(parsed.items) ? parsed.items : [],
       coupon: parsed.coupon || null
     }
   } catch {
@@ -48,6 +52,8 @@ function reducer (state, action) {
     }
     case 'REMOVE':
       return { ...state, items: state.items.filter(it => it.key !== action.key) }
+    case 'PRUNE':
+      return { ...state, items: state.items.filter(it => !action.keys.includes(it.key)) }
     case 'APPLY_COUPON':
       return { ...state, coupon: action.code }
     case 'REMOVE_COUPON':
@@ -61,15 +67,36 @@ function reducer (state, action) {
 
 export function CartProvider ({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, load)
+  const catalogue = useCatalogue()
+
+  const catalogueMap = useMemo(
+    () => new Map((catalogue.data || []).map(p => [p.id, p])),
+    [catalogue.data]
+  )
+
+  const resolve = id => (id.startsWith('q') ? getQuickProductById(id) : catalogueMap.get(id))
+
+  // Once the catalogue has actually loaded, drop any regular-item line whose
+  // product no longer exists (e.g. a vendor deleted it) — never while still
+  // loading, or every real item would look "invalid" for a moment and vanish.
+  useEffect(() => {
+    if (!catalogue.isSuccess) return
+    const dead = state.items.filter(it => !it.id.startsWith('q') && !catalogueMap.has(it.id)).map(it => it.key)
+    if (dead.length) dispatch({ type: 'PRUNE', keys: dead })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogue.isSuccess, catalogueMap])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
 
   const value = useMemo(() => {
-    const lines = state.items.map(it => ({ ...it, product: getProductById(it.id) }))
-    // `count` is how many distinct items are in the cart (what badges show);
-    // `units` is the quantity-weighted total.
+    // Lines only ever include items whose product actually resolved, so every
+    // consumer (PriceSummary, CartPage, checkout review) can trust `line.product`.
+    const lines = state.items
+      .map(it => ({ ...it, product: resolve(it.id) }))
+      .filter(l => l.product)
+
     const count = lines.length
     const units = lines.reduce((a, l) => a + l.qty, 0)
     const mrpTotal = lines.reduce((a, l) => a + l.product.mrp * l.qty, 0)
@@ -107,6 +134,9 @@ export function CartProvider ({ children }) {
       platformFee,
       total,
       savings: productDiscount + couponDiscount,
+      // True only while a *non-empty* cart's products are still resolving,
+      // so the empty-cart screen never flashes for a returning visitor.
+      isLoading: catalogue.isLoading && state.items.length > 0,
       add: (id, opts = {}) => dispatch({ type: 'ADD', id, ...opts }),
       setQty: (key, qty) => dispatch({ type: 'SET_QTY', key, qty }),
       remove: key => dispatch({ type: 'REMOVE', key }),
@@ -119,7 +149,8 @@ export function CartProvider ({ children }) {
       qtyOfVariant: (id, size, color) =>
         state.items.find(it => it.key === keyOf(id, size, color))?.qty || 0
     }
-  }, [state])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, catalogueMap, catalogue.isLoading])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

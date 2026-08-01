@@ -11,7 +11,7 @@ export const askSchema = z.object({
     .max(2000, 'Keep it under 2000 characters.')
 })
 
-/* Auth is phone + OTP. Name is only required when signing up, so the
+/* Auth is email + OTP. Name is only required when signing up, so the
    schema is built per mode rather than branching inside the component. */
 export const makeAuthSchema = mode =>
   z.object({
@@ -19,13 +19,15 @@ export const makeAuthSchema = mode =>
       mode === 'signup'
         ? z.string().trim().min(2, 'Please enter your full name.').max(60, 'That name is too long.')
         : z.string().trim().optional(),
-    phone: z
-      .string()
-      .regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number.')
+    email: z.string().trim().toLowerCase().email('Enter a valid email.')
   })
 
 export const otpSchema = z.object({
   otp: z.string().regex(/^\d{6}$/, 'Enter the 6-digit OTP.')
+})
+
+export const couponSchema = z.object({
+  code: z.string().trim().min(1, 'Enter a coupon code.').max(20)
 })
 
 export const addressSchema = z.object({

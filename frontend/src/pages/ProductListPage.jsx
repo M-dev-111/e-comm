@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SlidersHorizontal, X, ChevronDown, Check, SearchX } from 'lucide-react'
-import { PRODUCTS, CATEGORIES, BRANDS, PRICE_BUCKETS } from '../data/data'
+import { CATEGORIES, BRANDS, PRICE_BUCKETS } from '../data/data'
+import { useCatalogue } from '../hooks/useProducts'
 import ProductCard from '../components/product/ProductCard'
 import EmptyState from '../components/ui/EmptyState'
 import Container from '../components/ui/Container'
@@ -61,6 +62,7 @@ function FilterSection ({ title, children }) {
 export default function ProductListPage () {
   const [params, setParams] = useSearchParams()
   const [mobileFilters, setMobileFilters] = useState(false)
+  const { data: catalogue = [], isLoading } = useCatalogue()
 
   const q = params.get('q') || ''
   const category = params.get('category') || ''
@@ -90,7 +92,7 @@ export default function ProductListPage () {
   const priceKey = prices.join('|')
 
   const results = useMemo(() => {
-    let list = [...PRODUCTS]
+    let list = [...catalogue]
     if (category) list = list.filter(p => p.category === category)
     if (tag) list = list.filter(p => p.tags.includes(tag))
     if (q) {
@@ -109,7 +111,7 @@ export default function ProductListPage () {
       list = list.filter(p => p.price >= minPrice && p.price <= maxPrice)
     }
     return list.sort(SORTS.find(s => s.id === sort)?.fn || SORTS[0].fn)
-  }, [q, category, tag, sort, brandKey, priceKey, minRating, minPrice, maxPrice]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [catalogue, q, category, tag, sort, brandKey, priceKey, minRating, minPrice, maxPrice]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeCount = brands.length + prices.length + (minRating ? 1 : 0)
   const catLabel = CATEGORIES.find(c => c.id === category)?.label
@@ -214,7 +216,9 @@ export default function ProductListPage () {
             </div>
           </div>
 
-          {results.length === 0 ? (
+          {isLoading ? (
+            <div className='min-h-[40vh]' />
+          ) : results.length === 0 ? (
             <EmptyState
               icon={SearchX}
               title='No products found'

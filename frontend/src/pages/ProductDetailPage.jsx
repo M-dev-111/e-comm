@@ -5,7 +5,8 @@ import {
   BadgeCheck, ChevronRight, Heart, MapPin, PackageSearch, RotateCcw, ShieldCheck,
   Tag, Truck, Zap
 } from 'lucide-react'
-import { getProductById, getRelated, getReviewsFor, CATEGORIES, COUPONS } from '../data/data'
+import { getReviewsFor, CATEGORIES, COUPONS } from '../data/data'
+import { useProduct, useCatalogue } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { discountPct, deliveryDateLabel } from '../utils/format'
@@ -132,24 +133,34 @@ function PincodeCheck () {
 
 export default function ProductDetailPage () {
   const { id } = useParams()
-  const product = getProductById(id)
+  const { data: product, isLoading, isError } = useProduct(id)
+  const { data: catalogue = [] } = useCatalogue()
   const navigate = useNavigate()
   const cart = useCart()
   const wishlist = useWishlist()
 
-  // the page remounts per-route (keyed <Routes>), so lazy init is enough
-  const [size, setSize] = useState(() => product?.sizes?.[0] || null)
-  const [color, setColor] = useState(() => product?.colors?.[0] || null)
+  // null means "no explicit pick yet" — the product's first option is the
+  // fallback, computed at render time since the product itself now loads
+  // asynchronously (there's nothing to default to on the very first render).
+  const [pickedSize, setPickedSize] = useState(null)
+  const [pickedColor, setPickedColor] = useState(null)
   const [tab, setTab] = useState('description')
 
   const reviews = useMemo(() => (product ? getReviewsFor(product.id) : []), [product])
 
-  if (!product || product.id.startsWith('q')) {
+  if (isLoading) return <div className='min-h-[60vh]' />
+
+  if (isError || !product) {
     return <EmptyState icon={PackageSearch} title='Product not found' sub='This product may have been removed from the catalogue.' to='/products' cta='Browse products' />
   }
 
+  const size = pickedSize ?? product.sizes?.[0] ?? null
+  const color = pickedColor ?? product.colors?.[0] ?? null
+  const setSize = setPickedSize
+  const setColor = setPickedColor
+
   const liked = wishlist.has(product.id)
-  const related = getRelated(product)
+  const related = catalogue.filter(p => p.category === product.category && p.id !== product.id).slice(0, 8)
   const catLabel = CATEGORIES.find(c => c.id === product.category)?.label
 
   const buyNow = () => {

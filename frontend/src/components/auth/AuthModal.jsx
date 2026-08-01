@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Lock, ShieldCheck, Smartphone, X } from 'lucide-react'
+import { ArrowLeft, Lock, Mail, ShieldCheck, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { makeAuthSchema, otpSchema } from '../../lib/schemas'
 import { EASE } from '../../utils/motion'
@@ -17,7 +17,7 @@ function FieldError ({ children }) {
 
 /**
  * Two-panel auth modal.
- * Static flow: phone (+ name on sign-up) → any 6-digit OTP → logged in.
+ * Static flow: email (+ name on sign-up) → any 6-digit OTP → logged in.
  */
 export default function AuthModal ({ open, onClose }) {
   const auth = useAuth()
@@ -27,7 +27,7 @@ export default function AuthModal ({ open, onClose }) {
 
   const detailsForm = useForm({
     resolver: zodResolver(makeAuthSchema(mode)),
-    defaultValues: { name: '', phone: '' },
+    defaultValues: { name: '', email: '' },
     mode: 'onTouched'
   })
 
@@ -38,7 +38,7 @@ export default function AuthModal ({ open, onClose }) {
   })
 
   // useWatch (not watch()) keeps the component compiler-optimisable.
-  const phone = useWatch({ control: detailsForm.control, name: 'phone' })
+  const email = useWatch({ control: detailsForm.control, name: 'email' })
 
   const backToDetails = () => {
     setStep('form')
@@ -55,14 +55,14 @@ export default function AuthModal ({ open, onClose }) {
   const requestOtp = () => setStep('otp')
 
   const verifyOtp = () => {
-    const { name, phone: mobile } = detailsForm.getValues()
-    const displayName = mode === 'signup' ? name.trim() : `User ${mobile.slice(-4)}`
-    auth.login(displayName, mobile)
+    const { name, email: address } = detailsForm.getValues()
+    const displayName = mode === 'signup' ? name.trim() : address.split('@')[0]
+    auth.login(displayName, address)
     toast.success(`Welcome, ${displayName.split(' ')[0]}`)
     close()
   }
 
-  /** Digits-only input masks, applied on top of RHF's register(). */
+  /** Digits-only input mask for the OTP field, applied on top of RHF's register(). */
   const digitsOnly = (form, field, max) => {
     const { onChange, ...rest } = form.register(field)
     return {
@@ -155,16 +155,16 @@ export default function AuthModal ({ open, onClose }) {
                         )}
                         <div>
                           <div className='flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 transition-colors focus-within:border-royal-400 has-aria-invalid:border-rose-400'>
-                            <span className='text-[13.5px] font-semibold text-slate-500'>+91</span>
+                            <Mail className='h-4 w-4 shrink-0 text-slate-400' strokeWidth={2} />
                             <input
-                              {...digitsOnly(detailsForm, 'phone', 10)}
-                              placeholder='Mobile number'
-                              inputMode='numeric'
-                              aria-invalid={!!detailsForm.formState.errors.phone}
+                              {...detailsForm.register('email')}
+                              type='email'
+                              placeholder='Email address'
+                              aria-invalid={!!detailsForm.formState.errors.email}
                               className='w-full text-[13.5px] outline-none'
                             />
                           </div>
-                          <FieldError>{detailsForm.formState.errors.phone?.message}</FieldError>
+                          <FieldError>{detailsForm.formState.errors.email?.message}</FieldError>
                         </div>
                       </div>
 
@@ -210,11 +210,11 @@ export default function AuthModal ({ open, onClose }) {
 
                       <div className='mt-5 flex items-center gap-3'>
                         <span className='grid h-11 w-11 place-items-center rounded-xl bg-royal-50'>
-                          <Smartphone className='h-5 w-5 text-royal-600' strokeWidth={1.9} />
+                          <Mail className='h-5 w-5 text-royal-600' strokeWidth={1.9} />
                         </span>
                         <div>
-                          <p className='text-[14px] font-bold text-slate-900'>Verify your number</p>
-                          <p className='text-[12px] text-slate-400'>OTP sent to +91 {phone} (enter any 6 digits)</p>
+                          <p className='text-[14px] font-bold text-slate-900'>Verify your email</p>
+                          <p className='text-[12px] text-slate-400'>OTP sent to {email} (enter any 6 digits)</p>
                         </div>
                       </div>
 

@@ -13,6 +13,10 @@ export default function CartPage () {
   const cart = useCart()
   const navigate = useNavigate()
 
+  if (cart.isLoading) {
+    return <div className='min-h-[60vh]' />
+  }
+
   if (cart.lines.length === 0) {
     return (
       <EmptyState

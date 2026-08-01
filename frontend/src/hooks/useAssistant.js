@@ -6,6 +6,7 @@ import {
   parseMessage, prioritiesFor, rankProducts, summarise
 } from '../utils/assistantEngine'
 import { buildVocabulary, toWireCriteria } from '../utils/assistantVocabulary'
+import { useCatalogue } from './useProducts'
 import { useShopChat } from './useAi'
 
 /* ==================================================================
@@ -57,7 +58,7 @@ function stepFor (c) {
 }
 
 /** Bot turn(s) for the current state: an optional ack, then the next question. */
-function buildTurn (criteria, ack) {
+function buildTurn (products, criteria, ack) {
   const blocks = ack ? [bot({ text: ack })] : []
   const step = stepFor(criteria)
 
@@ -67,7 +68,7 @@ function buildTurn (criteria, ack) {
   }
 
   if (step === 'brand') {
-    const brands = brandsFor(criteria.category)
+    const brands = brandsFor(products, criteria.category)
     const count = brands.length
     blocks.push(
       bot({
@@ -88,7 +89,7 @@ function buildTurn (criteria, ack) {
         text: 'What is your budget? You can also just type something like "under ₹20,000".',
         kind: 'chips',
         chips: [
-          ...bucketsFor(criteria.category, criteria.brand).map(b => ({ label: b.short, value: b.id, field: 'budget' })),
+          ...bucketsFor(products, criteria.category, criteria.brand).map(b => ({ label: b.short, value: b.id, field: 'budget' })),
           { label: 'Any budget', value: 'any', field: 'budget', subtle: true }
         ]
       })
@@ -122,7 +123,7 @@ function buildTurn (criteria, ack) {
   }
 
   // results
-  const { matches, total, relaxed } = rankProducts(criteria)
+  const { matches, total, relaxed } = rankProducts(products, criteria)
 
   if (!matches.length) {
     blocks.push(
@@ -193,9 +194,9 @@ function ackFor (previous, next) {
 }
 
 /** Map "cheap"/"premium" onto a real price band once the category is known. */
-function applyTone (criteria) {
+function applyTone (products, criteria) {
   if (!criteria.tone || criteria.budget || !criteria.category) return criteria
-  const buckets = bucketsFor(criteria.category, criteria.brand)
+  const buckets = bucketsFor(products, criteria.category, criteria.brand)
   if (!buckets.length) return criteria
   const bucket = criteria.tone === 'cheap' ? buckets[0] : buckets[buckets.length - 1]
   return { ...criteria, budget: bucket.id }
@@ -235,7 +236,7 @@ function chipToPatch (chip) {
 }
 
 /** Turn one model response into the message blocks the panel renders. */
-function blocksFromAi (data, criteria) {
+function blocksFromAi (products, data, criteria) {
   const blocks = [bot({ text: data.reply })]
 
   if (data.intent === 'grocery') {
@@ -255,7 +256,7 @@ function blocksFromAi (data, criteria) {
   /* The model only decides *whether* to show products. Which products is
      always decided here, from the real catalogue. */
   if (data.showProducts && criteria.category) {
-    const { matches, total, relaxed } = rankProducts(criteria)
+    const { matches, total, relaxed } = rankProducts(products, criteria)
     if (matches.length) {
       blocks.push(
         bot({
@@ -295,6 +296,7 @@ export default function useAssistant () {
   const timers = useRef([])
 
   const chat = useShopChat()
+  const { data: products = [] } = useCatalogue()
 
   // read the transcript inside async callbacks without stale closures
   const messagesRef = useRef(messages)
@@ -366,12 +368,12 @@ export default function useAssistant () {
         return base
       }
 
-      const next = applyTone({ ...base, ...patch })
+      const next = applyTone(products, { ...base, ...patch })
       setCriteria(next)
-      say(buildTurn(next, ackFor(base, next)))
+      say(buildTurn(products, next, ackFor(base, next)))
       return next
     },
-    [say]
+    [say, products]
   )
 
   /* ---------------- the AI turn ---------------- */
@@ -383,7 +385,7 @@ export default function useAssistant () {
    */
   const aiTurn = useCallback(
     async (text, patch = {}) => {
-      const base = applyTone({ ...criteria, ...patch })
+      const base = applyTone(products, { ...criteria, ...patch })
       setCriteria(base)
       setTyping(true)
 
@@ -395,7 +397,7 @@ export default function useAssistant () {
           vocabulary: buildVocabulary(base.category)
         })
 
-        let merged = applyTone(mergeAiCriteria(base, data.criteria))
+        let merged = applyTone(products, mergeAiCriteria(base, data.criteria))
 
         /* The model occasionally words a budget ("keeping it under ₹8,000")
            without returning the numbers, which would leave the reply and the
@@ -406,7 +408,7 @@ export default function useAssistant () {
         if (!data.criteria?.brand && local.brand) merged = { ...merged, brand: local.brand }
 
         setCriteria(merged)
-        setMessages(prev => [...prev, ...blocksFromAi(data, merged)])
+        setMessages(prev => [...prev, ...blocksFromAi(products, data, merged)])
         setOffline(false)
         setTyping(false)
       } catch {
@@ -423,7 +425,7 @@ export default function useAssistant () {
         offlineTurn(text, base)
       }
     },
-    [chat, criteria, offline, offlineTurn]
+    [chat, criteria, offline, offlineTurn, products]
   )
 
   /* ---------------- public actions ---------------- */

@@ -1,13 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import dotenv from "dotenv";
-dotenv.config();
+import { env, PAID_ONLY } from "../config/env.js";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
-/* gemini-1.5-flash and gemini-2.5-flash are both retired for new keys.
-   "gemini-flash-latest" is an alias that always points at the current
-   free-tier flash model, so this won't 404 again on the next rotation. */
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
+const DEFAULT_MODEL = env.GEMINI_MODEL;
 
 /** Maps a Google SDK error onto an HTTP status we can pass through. */
 function statusFrom (error) {
@@ -20,6 +16,16 @@ function statusFrom (error) {
 /** POST /api/ai/ask — body already validated by the askSchema middleware. */
 export const askAI = async (req, res, next) => {
     const { message, model: requested } = req.body;
+
+    /* The client may only request a free-tier model. Without this check
+       a caller could pass model="gemini-2.5-pro" directly to the API and
+       bypass the free-tier guarantee that GEMINI_MODEL is validated for. */
+    if (requested && PAID_ONLY.test(requested)) {
+        const err = new Error("That model is paid-tier only and cannot be requested here.");
+        err.status = 400;
+        return next(err);
+    }
+
     const modelName = requested || DEFAULT_MODEL;
 
     try {

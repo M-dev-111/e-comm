@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Flame } from 'lucide-react'
-import { PRODUCTS } from '../../data/data'
+import { useCatalogue } from '../../hooks/useProducts'
 import useCountdown from '../../hooks/useCountdown'
 import ProductCard from '../product/ProductCard'
 import Container from '../ui/Container'
@@ -29,7 +29,10 @@ function TimeCell ({ value, label }) {
 
 export default function DealOfTheDay () {
   const { h, m, s } = useCountdown()
-  const deals = PRODUCTS.filter(p => p.tags.includes('deal'))
+  const { data: products = [] } = useCatalogue()
+  const deals = products.filter(p => p.tags.includes('deal'))
+
+  if (!deals.length) return null
 
   return (
     <section className='w-full bg-linear-to-b from-white to-royal-50/50 py-10'>

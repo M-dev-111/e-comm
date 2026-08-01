@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { ADDRESSES, getProductById } from '../data/data'
+import { ADDRESSES } from '../data/data'
 
 /** Placed orders — persisted, with a little demo history seeded in. */
 
@@ -13,25 +13,33 @@ const daysAgo = n => {
   return d.toISOString()
 }
 
-/** Snapshot prices at purchase time so history never shifts with the catalogue. */
-const lineFrom = (id, qty, extra = {}) => {
-  const product = getProductById(id)
-  return {
-    id,
-    qty,
-    size: extra.size ?? null,
-    color: extra.color ?? null,
-    name: product?.name ?? 'Item',
-    brand: product?.brand ?? '',
-    image: product?.images?.[0] ?? product?.image ?? '',
-    price: product?.price ?? 0
-  }
-}
-
+/* Demo order history is illustrative only, so its lines are inlined rather
+   than resolved from the live catalogue — that keeps it independent of
+   whatever a vendor has actually listed. */
 function seedOrders () {
   const home = ADDRESSES[0]
-  const delivered = [lineFrom('p3', 1, { size: 'UK 9' }), lineFrom('p6', 2, { size: 'L' })]
-  const shipped = [lineFrom('p1', 1, { color: 'Midnight Black' })]
+  const delivered = [
+    {
+      id: 'seed-1', qty: 1, size: 'UK 9', color: null,
+      name: 'AeroStride Velocity Running Shoes', brand: 'AeroStride',
+      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+      price: 3299
+    },
+    {
+      id: 'seed-2', qty: 2, size: 'L', color: null,
+      name: 'Essential Oversized Cotton Tee', brand: 'Drift',
+      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80',
+      price: 799
+    }
+  ]
+  const shipped = [
+    {
+      id: 'seed-3', qty: 1, size: null, color: 'Midnight Black',
+      name: 'Sonicwave Pro ANC Wireless Headphones', brand: 'Sonicwave',
+      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+      price: 4999
+    }
+  ]
 
   const sum = items => items.reduce((a, i) => a + i.price * i.qty, 0)
 

@@ -1,14 +1,19 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { useWishlist } from '../context/WishlistContext'
-import { getProductById } from '../data/data'
+import { useCatalogue } from '../hooks/useProducts'
 import ProductCard from '../components/product/ProductCard'
 import EmptyState from '../components/ui/EmptyState'
 import Container from '../components/ui/Container'
 
 export default function WishlistPage () {
   const wishlist = useWishlist()
-  const products = wishlist.ids.map(getProductById).filter(Boolean)
+  const { data: catalogue = [], isLoading } = useCatalogue()
+
+  if (isLoading) return <div className='min-h-[60vh]' />
+
+  const byId = new Map(catalogue.map(p => [p.id, p]))
+  const products = wishlist.ids.map(id => byId.get(id)).filter(Boolean)
 
   if (products.length === 0) {
     return (
