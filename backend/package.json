@@ -9,6 +9,13 @@
     "dev": "nodemon server.js",
     "seed": "node seed.js"
   },
+  "nodemonConfig": {
+    "//": "nodemon only watches js/mjs/json by default, so editing .env used to leave a stale key in the running process and every Gemini call failed with API_KEY_INVALID. Watch .env too.",
+    "ext": "js,mjs,cjs,json,env",
+    "ignore": [
+      "node_modules/**"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

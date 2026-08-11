@@ -13,6 +13,8 @@ dist-ssr
 *.local
 
 # Environment / secrets
+.env
+.env.*
 !.env.example
 
 # Build / tooling cache
